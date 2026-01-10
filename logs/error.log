@@ -1,3 +1,0 @@
-[2026-01-08T18:26:32.500Z] GET /crash | 500 | Test Error!
-[2026-01-08T19:06:42.312Z] GET /crash | 500 | Test Error!
-[2026-01-08T19:07:48.808Z] POST /workouts | 500 | insert or update on table "workouts" violates foreign key constraint "workouts_user_id_fkey"
