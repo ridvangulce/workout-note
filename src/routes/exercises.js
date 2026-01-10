@@ -32,7 +32,7 @@ router.get("/exercises", async (req, res, next) => {
             SELECT id, name
             FROM exercises
             WHERE user_id = $1
-            ORDER BY name ASC
+            ORDER BY id ASC
             `,[1]
         );
         res.json({

@@ -49,4 +49,71 @@ router.get("/workouts", async (req, res, next) => {
         next(err);
     }
 })
+
+router.get("/workouts/:id", async (req, res, next) => {
+    try {
+        const workoutId = req.params.id;
+        const workoutResult = await pool.query(
+            `
+           SELECT id, workout_date::text AS workout_date, note
+           FROM workouts
+           WHERE id = $1 AND user_id = $2 
+           `, [workoutId, 1]
+        )
+        if (workoutResult.rowCount === 0) {
+            const err = new Error("There's no workout belong to this user!")
+            err.statusCode = 400;
+            throw err;
+        }
+        const workout = workoutResult.rows[0];
+       
+        const exerciseResult = await pool.query(
+            `
+           SELECT DISTINCT e.id, e.name
+           FROM exercises e
+           JOIN sets s ON s.exercise_id = e.id
+           WHERE s.workout_id = $1
+           ORDER BY e.name ASC
+           `, [workoutId]
+        );
+        const exercises = exerciseResult.rows;
+
+        if (exerciseResult.rowCount === 0) {
+            workout.exercises = [];
+            return res.json({ workout });
+        }
+        const exerciseIds = exercises.map(e => e.id);
+        const setResults = await pool.query(
+            `
+            SELECT id, set_number, weight, reps, workout_id, exercise_id
+            FROM sets
+            WHERE workout_id = $1 AND exercise_id = ANY($2)
+            ORDER BY exercise_id, set_number
+            `, [workoutId, exerciseIds]
+        )
+        
+        const setsByExercise = {};
+        for (const set of setResults.rows) {
+            if (!setsByExercise[set.exercise_id]) {
+                setsByExercise[set.exercise_id] = [];
+            }
+
+            setsByExercise[set.exercise_id].push({
+                id: set.id,
+                set_number: set.set_number,
+                reps: set.reps,
+                weight: set.weight,
+            });
+        }
+        workout.exercises = exercises.map(ex => ({
+            id: ex.id,
+            name: ex.name,
+            sets: setsByExercise[ex.id] || [],
+        }));
+        res.json({ workout });
+    } catch (err) {
+        next(err);
+    };
+});
+
 module.exports = router;
