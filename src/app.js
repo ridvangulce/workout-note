@@ -6,6 +6,7 @@ const healthRoutes = require("./routes/health");
 const workoutRoutes = require("./routes/workouts");
 const exerciseRoutes = require("./routes/exercises");
 const setRoutes = require("./routes/sets");
+const auth = require("./routes/auth");
 const app = express();
 
 app.use(express.json());
@@ -20,6 +21,9 @@ app.use(exerciseRoutes);
 
 app.use(setRoutes);
 
+app.use(auth)
+
 app.use(errorHandler);
+
 
 module.exports = app;

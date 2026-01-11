@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
-
+const authMiddleware = require("../middlewares/auth");
 router.post("/workouts", async (req, res, next) => {
     try {
         const { workout_date, note } = req.body;
@@ -50,7 +50,7 @@ router.get("/workouts", async (req, res, next) => {
     }
 })
 
-router.get("/workouts/:id", async (req, res, next) => {
+router.get("/workouts/:id", authMiddleware , async (req, res, next) => {
     try {
         const workoutId = req.params.id;
         const workoutResult = await pool.query(
@@ -58,7 +58,7 @@ router.get("/workouts/:id", async (req, res, next) => {
            SELECT id, workout_date::text AS workout_date, note
            FROM workouts
            WHERE id = $1 AND user_id = $2 
-           `, [workoutId, 1]
+           `, [workoutId, req.user.id]
         )
         if (workoutResult.rowCount === 0) {
             const err = new Error("There's no workout belong to this user!")
