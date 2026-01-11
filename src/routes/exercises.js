@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
+const AppError = require("../errors/AppError");
 
 router.post("/exercises", async (req, res, next) => {
     try {
         const { name } = req.body;
         if (!name) {
-            const err = new Error("Username is missing!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Username is missing!", 400);
         }
         const result = await pool.query(
             `

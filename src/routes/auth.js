@@ -3,15 +3,13 @@ const bcrypt = require("bcrypt");
 const pool = require("../config/db");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-
+const AppError = require("../errors/AppError");
 
 router.post("/register", async (req, res, next) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            const err = new Error("email and password required");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("E-mail and password required", 400)
         }
         const registerQuery = await pool.query(
             `
@@ -20,10 +18,8 @@ router.post("/register", async (req, res, next) => {
             WHERE email = $1
             `,[email]
         )
-        if (registerQuery) {
-            const err = new Error("User already exist!");
-            err.statusCode = 402;
-            throw err;
+        if (registerQuery.rowCount > 0) {
+            throw new AppError("User already exist!", 409);
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         await pool.query(
@@ -44,9 +40,7 @@ router.post("/login", async (req, res, next) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            const err = new Error("Email and Password is missing");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Email and Password is missing", 400)
         }
         const result = await pool.query(
             `
@@ -56,17 +50,13 @@ router.post("/login", async (req, res, next) => {
             `,[email]
         )
         if (result.rowCount === 0) {
-            const err = new Error("invalid credentials");
-            err.statusCode = 401;
-            throw err;
+            throw new AppError("Invalid credentials", 401)
         }
         const user = result.rows[0];
 
         const isValid = await bcrypt.compare(password, user.password_hash);
         if (!isValid) {
-            const err = new Error("invalid credentials");
-            err.statusCode = 401;
-            throw err;
+            throw new AppError("Invalid credentials", 401)
         };
         const token = jwt.sign(
         { sub: user.id },

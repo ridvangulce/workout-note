@@ -2,16 +2,14 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
 const authMiddleware = require("../middlewares/auth");
+const AppError = require("../errors/AppError");
 router.post("/workouts", async (req, res, next) => {
     try {
         const { workout_date, note } = req.body;
 
         if (!workout_date) {
-            const err = new Error("workout_date is required!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("workout_date is required!"), 400;
         }
-
         const result = await pool.query(
             `
             INSERT INTO workouts(user_id, workout_date, note)
@@ -61,9 +59,7 @@ router.get("/workouts/:id", authMiddleware , async (req, res, next) => {
            `, [workoutId, req.user.id]
         )
         if (workoutResult.rowCount === 0) {
-            const err = new Error("There's no workout belong to this user!")
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("There's no workout belong to this user!", 400)
         }
         const workout = workoutResult.rows[0];
        

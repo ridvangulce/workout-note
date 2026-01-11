@@ -1,29 +1,22 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
+const AppError = require("../errors/AppError");
 
 router.post("/sets", async (req, res, next) => {
     try {
         const { workout_id, exercise_id, set_number, reps, weight } = req.body;
         if (!reps) {
-            const err = new Error("Reps is missing!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Reps is missing!", 400);
         }
         if (!exercise_id) {
-            const err = new Error("Exercise is missing!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Exercise is missing!", 400);
         }
         if (!workout_id) {
-            const err = new Error("Workout is missing!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Workout is missing!", 400);
         }
         if (!set_number) {
-            const err = new Error("Set Number is missing!");
-            err.statusCode = 400;
-            throw err;
+            throw new AppError("Set Number is missing!", 400);
         }
         const workoutCheck = await pool.query(
             `
@@ -33,9 +26,7 @@ router.post("/sets", async (req, res, next) => {
             `,[workout_id, 1]
         )
          if (workoutCheck.rowCount === 0) {
-            const err = new Error("Workout doesn't belong to user!");
-            err.statusCode = 403;
-            throw err;
+            throw new AppError("Workout doesn't belong to user!", 403);
         }
         const exerciseCheck = await pool.query(
             `
@@ -45,9 +36,7 @@ router.post("/sets", async (req, res, next) => {
             `,[exercise_id, 1]
         )
         if (exerciseCheck.rowCount === 0) {
-            const err = new Error("Exercise doesn't belong to user!");
-            err.statusCode = 403;
-            throw err;
+            throw new AppError("Exercise doesn't belong to user!", 403);
         }
 
         const result = await pool.query(
