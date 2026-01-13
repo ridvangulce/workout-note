@@ -1,29 +1,41 @@
 const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
+const AppError = require("../errors/AppError");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
+  try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader) {
-        res.status(401).json({
-            error: "Missing authorization header!",
-        });
-    }
-
-    if (!authHeader.startsWith("Bearer ")) {
-        res.status(401).json({
-            error: "Invalid format!",
-        })
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      throw new AppError("Unauthorized", 401);
     }
 
     const token = authHeader.split(" ")[1];
-    try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = {
-            id: payload.sub,
-        }
-        next();
-    } catch (error) {
-        return res.status(401).json({ error: "Invalid or expired token" });
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      throw new AppError("Invalid or expired token", 401);
     }
-}
+
+    const userId = payload.sub;
+
+    const userResult = await pool.query(
+      `SELECT id FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    req.user = {
+      id: userId,
+    };
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
