@@ -2,12 +2,12 @@ const express = require("express");
 
 const logger = require("./middlewares/logger")
 const errorHandler = require("./middlewares/error")
-const healthRoutes = require("./routes/health");
+const healthRoutes = require("./routes/health.route");
 const workoutRoutes = require("./routes/workouts.route");
-const exerciseRoutes = require("./routes/exercises");
-const setRoutes = require("./routes/sets");
+const exerciseRoutes = require("./routes/exercises.route");
+const setRoutes = require("./routes/sets.route");
 const cookieParser = require("cookie-parser");
-const auth = require("./routes/auth");
+const auth = require("./routes/auth.route");
 const app = express();
 
 app.use(express.json());
