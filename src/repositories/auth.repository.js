@@ -20,8 +20,20 @@ const checkUser = async (email) => {
         LIMIT 1
         `,[email]
     )
-    return result.rowCount > 0;
+    return result.rows[0];
+}
+
+const refreshToken = async (userId, refreshToken, expiresAt) => {
+    const result = await pool.query(
+        `
+        INSERT INTO refresh_tokens(user_id, token, expires_at)
+        VALUES($1, $2, $3)
+        RETURNING *
+        `,[userId, refreshToken, expiresAt]
+    )
+    return result.rows[0];
 }
 
 
-module.exports = { register, checkUser };
+
+module.exports = { register, checkUser, refreshToken };

@@ -6,35 +6,6 @@ const router = express.Router();
 const crypto = require("crypto");
 const AppError = require("../errors/AppError");
 const authController = require("../controllers/auth.controller");
-// router.post("/register", async (req, res, next) => {
-//     try {
-//         const { email, password } = req.body;
-//         if (!email || !password) {
-//             throw new AppError("E-mail and password required", 400)
-//         }
-//         const registerQuery = await pool.query(
-//             `
-//             SELECT email
-//             FROM users
-//             WHERE email = $1
-//             `,[email]
-//         )
-//         if (registerQuery.rowCount > 0) {
-//             throw new AppError("User already exist!", 409);
-//         }
-//         const hashedPassword = await bcrypt.hash(password, 10);
-//         await pool.query(
-//             `
-//             INSERT INTO users(email, password_hash)
-//             VALUES($1, $2)
-//             `, [email, hashedPassword]
-//         );
-//         res.status(201).json({ message: "user registered" });
-
-//     } catch (err) {
-//         next(err);
-//     }
-// })
 
 router.post("/register", authController.register);
 

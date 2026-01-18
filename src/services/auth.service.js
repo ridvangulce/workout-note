@@ -1,5 +1,7 @@
 const authRepo = require("../repositories/auth.repository");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken")
+const crypto = require("crypto");
 const AppError = require("../errors/AppError");
 
 const register = async (email, password, userId) => {
@@ -13,18 +15,47 @@ const register = async (email, password, userId) => {
         throw new AppError("Password is missing!", 404);
     }
     const checkUser = await authRepo.checkUser(email);
-
     if (checkUser) {
         throw new AppError("User already exist!", 401);
     }
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const registerQuery = await authRepo.register(
         email,
         hashedPassword
     )
-    
     return registerQuery;
 };
 
-module.exports = { register };
+const login = async (userId, email, password) => {
+  if (userId) throw new AppError("User already logged in!", 400);
+  if (!email) throw new AppError("Email is required!", 400);
+  if (!password) throw new AppError("Password is required!", 400);
+
+  const user = await authRepo.checkUser(email);
+  if (!user) throw new AppError("Invalid credentials!", 401);
+
+  const isValid = await bcrypt.compare(password, user.password_hash);
+  if (!isValid) throw new AppError("Invalid credentials!", 401);
+
+  const accessToken = jwt.sign(
+    { sub: user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: "10m" }
+  );
+
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7);
+
+  await authRepo.refreshToken(user.id, refreshToken, expiresAt);
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresAt,
+    user: { id: user.id, email: user.email }
+  };
+};
+
+
+module.exports = { register, login };
