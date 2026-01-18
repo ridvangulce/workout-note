@@ -1,5 +1,3 @@
-const pool = require("../config/db");
-const AppError = require("../errors/AppError");
 const workoutsService = require("../services/workouts.service");
 
 const createWorkout = async (req, res, next) => {
