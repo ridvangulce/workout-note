@@ -31,9 +31,8 @@ const login = async (userId, email, password) => {
   if (!email) throw new AppError("Email is required!", 400);
   if (!password) throw new AppError("Password is required!", 400);
 
-  const user = await authRepo.checkUser(email);
+  const user = await authRepo.getUserByEmail(email);
   if (!user) throw new AppError("Invalid credentials!", 401);
-
   const isValid = await bcrypt.compare(password, user.password_hash);
   if (!isValid) throw new AppError("Invalid credentials!", 401);
 
@@ -53,7 +52,7 @@ const login = async (userId, email, password) => {
     accessToken,
     refreshToken,
     expiresAt,
-    user: { id: user.id, email: user.email }
+    user: { id: user.id, email: user.email}
   };
 };
 

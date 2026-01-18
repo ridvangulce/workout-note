@@ -9,55 +9,7 @@ const authController = require("../controllers/auth.controller");
 
 router.post("/register", authController.register);
 
-router.post("/login", async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            throw new AppError("Email and Password is missing", 400)
-        }
-        const result = await pool.query(
-            `
-            SELECT id, email, password_hash
-            FROM users
-            WHERE email = $1
-            `,[email]
-        )
-        if (result.rowCount === 0) {
-            throw new AppError("Invalid credentials", 401)
-        }
-        const user = result.rows[0];
-
-        const isValid = await bcrypt.compare(password, user.password_hash);
-        if (!isValid) {
-            throw new AppError("Invalid credentials", 401)
-        };
-        const accessToken = jwt.sign(
-        { sub: user.id },
-        process.env.JWT_SECRET,
-        { expiresIn: "10m" }
-        );
-        const refreshToken = crypto.randomBytes(64).toString("hex");
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-
-        await pool.query(
-            `
-            INSERT INTO refresh_tokens(user_id, token, expires_at)
-            VALUES($1, $2, $3)
-            RETURNING *
-            `,[user.id, refreshToken, expiresAt]
-        )
-        res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV ? true : false,
-            sameSite: "strict",
-            expires: expiresAt,
-        });
-        res.json({ accessToken });
-    } catch (err) {
-        next(err);
-    }
-})
+router.post("/login", authController.login);
 
 router.post("/refresh", async (req, res, next) => {
     try {

@@ -23,6 +23,18 @@ const checkUser = async (email) => {
     return result.rows[0];
 }
 
+const getUserByEmail = async (email) => {
+    const result = await pool.query(
+        `
+        SELECT id, email, password_hash, created_at
+        FROM users
+        WHERE email = $1
+        LIMIT 1
+        `, [email]
+    );
+    return result.rows[0];
+}
+
 const refreshToken = async (userId, refreshToken, expiresAt) => {
     const result = await pool.query(
         `
@@ -36,4 +48,4 @@ const refreshToken = async (userId, refreshToken, expiresAt) => {
 
 
 
-module.exports = { register, checkUser, refreshToken };
+module.exports = { register, checkUser, refreshToken, getUserByEmail };

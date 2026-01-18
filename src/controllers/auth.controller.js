@@ -19,7 +19,6 @@ const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const userId = req?.user?.id;
-
         const result = await authService.login(userId, email, password);
 
         res.cookie("refreshToken", result.refreshToken, {
