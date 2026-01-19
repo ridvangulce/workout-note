@@ -37,5 +37,29 @@ const login = async (req, res, next) => {
     }
 };
 
+const refresh = async (req, res, next) => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        const accessToken = await authService.refresh(refreshToken);
+        res.json({ accessToken });
+    } catch (err) {
+        next(err)
+    }
+}
 
-module.exports = {register, login}
+const logout = async (req, res, next) => {
+    try {
+        const refreshToken = req?.cookies?.refreshToken;
+        await authService.logout(refreshToken);
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            sameSite: "lax",
+            secure: false,
+        });
+        res.status(204).end();
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = {register, login, refresh, logout}

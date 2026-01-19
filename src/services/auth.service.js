@@ -46,7 +46,7 @@ const login = async (userId, email, password) => {
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7);
 
-  await authRepo.refreshToken(user.id, refreshToken, expiresAt);
+  await authRepo.saveRefreshToken(user.id, refreshToken, expiresAt);
 
   return {
     accessToken,
@@ -56,5 +56,31 @@ const login = async (userId, email, password) => {
   };
 };
 
+const refresh = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new AppError("Unauthorized", 401);
+    }
+    const tokenRow = await authRepo.findRefreshToken(refreshToken);
+    if (!tokenRow) {
+        throw new AppError("Unauthorized", 401);
+    }
+    if (new Date(tokenRow.expires_at) < new Date()) {
+        await authRepository.deleteRefreshToken(refreshToken);
+        throw new AppError("Unauthorized", 401);
+    }
+    return jwt.sign(
+        { sub: tokenRow.user_id },
+        process.env.JWT_SECRET,
+        { expiresIn: "10m" }
+    );
+}
 
-module.exports = { register, login };
+const logout = async (refreshToken) => {
+    if (!refreshToken) {
+        throw new AppError("Unauthorized!", 401);
+    }
+    await authRepo.deleteRefreshToken(refreshToken);
+}
+
+
+module.exports = { register, login, refresh, logout };
