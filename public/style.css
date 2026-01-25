@@ -87,6 +87,10 @@ body {
     color: var(--text-color);
 }
 
+.nav-links .btn-primary {
+    color: #fff;
+}
+
 /* Language Switcher */
 .lang-switcher {
     display: flex;
