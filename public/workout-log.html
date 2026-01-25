@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Logger - Workout API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dashboard-page">
+    <div class="background-glow"></div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Workout<span class="highlight">API</span></a>
+        <div class="nav-links">
+            <a href="/dashboard.html">Cancel / Back</a>
+        </div>
+    </nav>
+
+    <div class="main-content" style="margin: 0; padding-top: var(--nav-height); max-width: 800px; margin: 0 auto;">
+        <header class="dashboard-header">
+            <h2 id="workoutTitle">Loading...</h2>
+            <button class="btn btn-primary" id="finishWorkoutBtn">Finish Workout</button>
+        </header>
+
+        <div id="logger-container">
+            <!-- Exercises will be loaded here -->
+        </div>
+    </div>
+
+    <script src="app.v2.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const routineId = urlParams.get('routine');
+            const workoutId = urlParams.get('workoutId');
+
+            if (!routineId && !workoutId) {
+                alert('No routine or workout specified');
+                window.location.href = '/dashboard.html';
+                return;
+            }
+
+            if (workoutId) {
+                // EDIT MODE
+                document.getElementById('finishWorkoutBtn').textContent = 'Update Workout';
+                await loadWorkoutForEdit(workoutId);
+            } else {
+                // CREATE MODE
+                await loadRoutineForCreate(routineId);
+            }
+        });
+
+        async function loadRoutineForCreate(routineId) {
+            try {
+                const res = await fetchWithAuth(`/api/routines/${routineId}`);
+                if (res.ok) {
+                    const routine = await res.json();
+                    document.getElementById('workoutTitle').textContent = routine.name;
+                    renderLogger(routine.exercises);
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        let originalWorkoutDate = null;
+
+        async function loadWorkoutForEdit(workoutId) {
+            try {
+                const res = await fetchWithAuth(`/api/workouts/${workoutId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const workout = data.workout; // Controller returns { workout: ... }
+                    originalWorkoutDate = workout.workout_date;
+
+                    document.getElementById('workoutTitle').textContent = 'Edit: ' + new Date(workout.workout_date).toLocaleDateString();
+
+                    // Render exercises and sets
+                    renderLogger(workout.exercises, true);
+
+                    // Populate Sets
+                    workout.exercises.forEach(ex => {
+                        const container = document.getElementById(`sets-${ex.id}`);
+                        container.innerHTML = ''; // Clear initial empty set
+
+                        ex.sets.forEach((set, index) => {
+                            addSetRow(ex.id, set);
+                        });
+                    });
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function renderLogger(exercises, isEdit = false) {
+            const container = document.getElementById('logger-container');
+            container.innerHTML = exercises.map(ex => `
+                <div class="routine-card" style="margin-bottom: 2rem; cursor: default;">
+                    <div class="routine-title">${ex.name}</div>
+                    
+                    <div class="sets-container" id="sets-${ex.id}">
+                        <!-- Sets rows -->
+                    </div>
+
+                    <button class="btn btn-outline btn-sm" style="margin-top:1rem;" onclick="addSetRow('${ex.id}')">+ Add Set</button>
+                </div>
+            `).join('');
+
+            // If create mode, add initial set row
+            if (!isEdit) {
+                exercises.forEach(ex => addSetRow(ex.id));
+            }
+        }
+
+        window.addSetRow = function (exerciseId, existingSet = null) {
+            const container = document.getElementById(`sets-${exerciseId}`);
+            const setNum = container.children.length + 1;
+
+            const div = document.createElement('div');
+            div.className = 'set-row';
+            div.style.display = 'flex';
+            div.style.gap = '10px';
+            div.style.marginBottom = '10px';
+            div.style.alignItems = 'center';
+
+            const weightVal = existingSet ? existingSet.weight : '';
+            const repsActual = existingSet ? (existingSet.reps || existingSet.res) : '';
+            const rirVal = existingSet && existingSet.rir ? existingSet.rir : '';
+            const noteVal = existingSet && existingSet.note ? existingSet.note : '';
+            const unitVal = existingSet && existingSet.weight_unit ? existingSet.weight_unit : 'kg';
+
+            div.innerHTML = `
+                <span class="set-number" style="color:var(--text-muted); width: 20px;">${setNum}</span>
+                <input type="number" placeholder="Weight" class="set-input" name="weight" style="width: 70px;" value="${weightVal}">
+                <select class="set-input" name="unit" style="width: 60px; padding: 0.5rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-color);">
+                    <option value="kg" ${unitVal === 'kg' ? 'selected' : ''}>kg</option>
+                    <option value="lbs" ${unitVal === 'lbs' ? 'selected' : ''}>lbs</option>
+                    <option value="plate" ${unitVal === 'plate' ? 'selected' : ''}>plt</option>
+                </select>
+                <input type="number" placeholder="reps" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
+                <input type="number" placeholder="RIR" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
+                <input type="text" placeholder="Note" class="set-input" name="note" style="flex:1;" value="${noteVal}">
+                <button class="btn btn-sm btn-outline" style="padding: 2px 8px;" onclick="this.parentElement.remove()">x</button>
+            `;
+            container.appendChild(div);
+        }
+
+        // Finish/Update Workout Logic
+        const finishBtn = document.getElementById('finishWorkoutBtn');
+        if (finishBtn) {
+            finishBtn.addEventListener('click', async () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const workoutId = urlParams.get('workoutId');
+
+                const actionText = workoutId ? 'update' : 'finish';
+                if (!confirm(`Are you sure you want to ${actionText} this workout?`)) return;
+
+                const workoutTitle = document.getElementById('workoutTitle').textContent;
+
+                // Gather sets
+                const sets = [];
+                document.querySelectorAll('.routine-card').forEach(card => {
+                    const setsContainer = card.querySelector('.sets-container');
+                    const exerciseId = setsContainer.id.replace('sets-', '');
+
+                    setsContainer.querySelectorAll('.set-row').forEach((row, index) => {
+                        const weight = row.querySelector('[name="weight"]').value;
+                        const unit = row.querySelector('[name="unit"]').value;
+                        const reps = row.querySelector('[name="reps"]').value;
+                        const rir = row.querySelector('[name="rir"]').value;
+                        const note = row.querySelector('[name="note"]').value;
+                        const weightVal = parseFloat(weight);
+                        const repsVal = parseInt(reps);
+
+                        // Check if valid number (allow 0)
+                        const hasWeight = !isNaN(weightVal);
+                        const hasReps = !isNaN(repsVal);
+
+                        if (hasWeight || hasReps) {
+                            sets.push({
+                                exercise_id: exerciseId,
+                                set_number: index + 1,
+                                weight: hasWeight ? weightVal : 0,
+                                weight_unit: unit,
+                                reps: hasReps ? repsVal : 0,
+                                rir: parseInt(rir) || null,
+                                note: note
+                            });
+                        }
+                    });
+                });
+
+                // GATHERING DEBUG
+                console.log("Gathered Sets:", sets);
+                if (sets.length === 0) {
+                    alert('Log script found 0 sets! Please ensure you entered Weight or Reps.');
+                    return;
+                }
+                // alert(`Debug: Sending ${sets.length} sets to backend.`);
+
+                try {
+                    let url = '/api/workouts';
+                    let method = 'POST';
+                    let body = {
+                        workout_date: new Date().toISOString(),
+                        note: `Workout: ${workoutTitle}`,
+                        sets: sets
+                    };
+
+                    if (workoutId) {
+                        url = `/api/workouts/${workoutId}`;
+                        method = 'PUT';
+                        body = {
+                            workout_date: originalWorkoutDate || new Date().toISOString(),
+                            note: workoutTitle.replace('Edit: ', ''),
+                            sets: sets
+                        };
+                    }
+
+                    const res = await fetchWithAuth(url, {
+                        method: method,
+                        body: body
+                    });
+
+                    if (res.ok) {
+                        alert(`Workout ${workoutId ? 'Updated' : 'Saved'}!`);
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        const err = await res.json();
+                        alert('Failed: ' + (err.error || err.message));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Error saving workout');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

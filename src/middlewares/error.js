@@ -20,11 +20,12 @@ module.exports = (err, req, res, next) => {
   });
 
   if (err.isOperational) {
+    console.error(`[OPERATIONAL ERROR] ${status} - ${err.message}`); // Log to console for dev visibility
     return res.status(status).json({
       error: err.message,
     });
   }
-  
+
   console.error("UNEXPECTED ERROR:", err);
 
   return res.status(500).json({

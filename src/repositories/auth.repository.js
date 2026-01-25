@@ -20,8 +20,50 @@ const checkUser = async (email) => {
         LIMIT 1
         `,[email]
     )
-    return result.rowCount > 0;
+    return result.rows[0];
 }
 
+const getUserByEmail = async (email) => {
+    const result = await pool.query(
+        `
+        SELECT id, email, password_hash, created_at
+        FROM users
+        WHERE email = $1
+        LIMIT 1
+        `, [email]
+    );
+    return result.rows[0];
+}
 
-module.exports = { register, checkUser };
+const saveRefreshToken = async (userId, refreshToken, expiresAt) => {
+    const result = await pool.query(
+        `
+        INSERT INTO refresh_tokens(user_id, token, expires_at)
+        VALUES($1, $2, $3)
+        RETURNING *
+        `,[userId, refreshToken, expiresAt]
+    )
+    return result.rows[0];
+}
+
+const findRefreshToken = async (refreshToken) => {
+    const result = await pool.query(
+        `
+        SELECT user_id, expires_at
+        FROM refresh_tokens
+        WHERE token = $1
+        `, [refreshToken]
+    )
+    return result.rows[0];
+}
+
+const deleteRefreshToken = async (token) => {
+    await pool.query(
+    `
+    DELETE FROM refresh_tokens
+    WHERE token = $1
+    `,
+        [token]
+    );
+};
+module.exports = { register, checkUser, getUserByEmail, saveRefreshToken, findRefreshToken, deleteRefreshToken };

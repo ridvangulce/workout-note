@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require("../config/db");
 const AppError = require("../errors/AppError");
 
-router.post("/sets", async (req, res, next) => {
+router.post("/api/sets", async (req, res, next) => {
     try {
         const { workout_id, exercise_id, set_number, reps, weight } = req.body;
         if (!reps) {
@@ -23,9 +23,9 @@ router.post("/sets", async (req, res, next) => {
             SELECT id
             FROM workouts
             WHERE id = $1 AND user_id = $2
-            `,[workout_id, 1]
+            `, [workout_id, 1]
         )
-         if (workoutCheck.rowCount === 0) {
+        if (workoutCheck.rowCount === 0) {
             throw new AppError("Workout doesn't belong to user!", 403);
         }
         const exerciseCheck = await pool.query(
@@ -33,7 +33,7 @@ router.post("/sets", async (req, res, next) => {
             SELECT id, name
             FROM exercises
             WHERE id = $1 AND user_id = $2
-            `,[exercise_id, 1]
+            `, [exercise_id, 1]
         )
         if (exerciseCheck.rowCount === 0) {
             throw new AppError("Exercise doesn't belong to user!", 403);
