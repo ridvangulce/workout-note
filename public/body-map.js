@@ -14,7 +14,7 @@ const BODY_MAP = {
             toggleBtn.addEventListener('click', () => {
                 const isHidden = container.style.display === 'none';
                 container.style.display = isHidden ? 'block' : 'none';
-                text.textContent = isHidden ? 'Hide Body Map' : 'Show Body Map';
+                text.textContent = I18N.t(isHidden ? 'hide_body_map' : 'show_body_map');
                 toggleBtn.classList.toggle('btn-primary', isHidden);
                 toggleBtn.classList.toggle('btn-outline', !isHidden);
             });

@@ -4,11 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout Logger - Workout API</title>
+    <title data-i18n="title_logger">Workout Logger - Workout API</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="app.v2.js"></script>
 </head>
 
 <body class="dashboard-page">
@@ -17,14 +20,14 @@
     <nav class="navbar">
         <a href="/" class="logo">Workout<span class="highlight">API</span></a>
         <div class="nav-links">
-            <a href="/dashboard.html">Cancel / Back</a>
+            <a href="/dashboard.html" data-i18n="nav_cancel_back">Cancel / Back</a>
         </div>
     </nav>
 
     <div class="main-content" style="margin: 0; padding-top: var(--nav-height); max-width: 800px; margin: 0 auto;">
         <header class="dashboard-header">
-            <h2 id="workoutTitle">Loading...</h2>
-            <button class="btn btn-primary" id="finishWorkoutBtn">Finish Workout</button>
+            <h2 id="workoutTitle" data-i18n="loading">Loading...</h2>
+            <button class="btn btn-primary" id="finishWorkoutBtn" data-i18n="finish_workout">Finish Workout</button>
         </header>
 
         <div id="logger-container">
@@ -32,7 +35,6 @@
         </div>
     </div>
 
-    <script src="app.v2.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -47,10 +49,13 @@
 
             if (workoutId) {
                 // EDIT MODE
-                document.getElementById('finishWorkoutBtn').textContent = 'Update Workout';
+                document.getElementById('finishWorkoutBtn').textContent = I18N.t('update_workout');
+                document.getElementById('finishWorkoutBtn').dataset.i18n = 'update_workout';
                 await loadWorkoutForEdit(workoutId);
             } else {
                 // CREATE MODE
+                document.getElementById('finishWorkoutBtn').textContent = I18N.t('finish_workout');
+                document.getElementById('finishWorkoutBtn').dataset.i18n = 'finish_workout';
                 await loadRoutineForCreate(routineId);
             }
         });
@@ -76,7 +81,7 @@
                     const workout = data.workout; // Controller returns { workout: ... }
                     originalWorkoutDate = workout.workout_date;
 
-                    document.getElementById('workoutTitle').textContent = 'Edit: ' + new Date(workout.workout_date).toLocaleDateString();
+                    document.getElementById('workoutTitle').textContent = I18N.t('edit_exercise').split(':')[0] + ': ' + new Date(workout.workout_date).toLocaleDateString();
 
                     // Render exercises and sets
                     renderLogger(workout.exercises, true);
@@ -104,7 +109,7 @@
                         <!-- Sets rows -->
                     </div>
 
-                    <button class="btn btn-outline btn-sm" style="margin-top:1rem;" onclick="addSetRow('${ex.id}')">+ Add Set</button>
+                    <button class="btn btn-outline btn-sm" style="margin-top:1rem;" onclick="addSetRow('${ex.id}')" data-i18n="add_set">${I18N.t('add_set')}</button>
                 </div>
             `).join('');
 
@@ -133,15 +138,15 @@
 
             div.innerHTML = `
                 <span class="set-number" style="color:var(--text-muted); width: 20px;">${setNum}</span>
-                <input type="number" placeholder="Weight" class="set-input" name="weight" style="width: 70px;" value="${weightVal}">
+                <input type="number" placeholder="${I18N.t('weight_label')}" class="set-input" name="weight" style="width: 70px;" value="${weightVal}">
                 <select class="set-input" name="unit" style="width: 60px; padding: 0.5rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-color);">
                     <option value="kg" ${unitVal === 'kg' ? 'selected' : ''}>kg</option>
                     <option value="lbs" ${unitVal === 'lbs' ? 'selected' : ''}>lbs</option>
                     <option value="plate" ${unitVal === 'plate' ? 'selected' : ''}>plt</option>
                 </select>
-                <input type="number" placeholder="reps" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
-                <input type="number" placeholder="RIR" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
-                <input type="text" placeholder="Note" class="set-input" name="note" style="flex:1;" value="${noteVal}">
+                <input type="number" placeholder="${I18N.t('reps_label')}" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
+                <input type="number" placeholder="${I18N.t('rir_label')}" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
+                <input type="text" placeholder="${I18N.t('note_label')}" class="set-input" name="note" style="flex:1;" value="${noteVal}">
                 <button class="btn btn-sm btn-outline" style="padding: 2px 8px;" onclick="this.parentElement.remove()">x</button>
             `;
             container.appendChild(div);
@@ -154,8 +159,8 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const workoutId = urlParams.get('workoutId');
 
-                const actionText = workoutId ? 'update' : 'finish';
-                if (!confirm(`Are you sure you want to ${actionText} this workout?`)) return;
+                const confirmKey = workoutId ? 'confirm_update' : 'confirm_finish';
+                if (!confirm(I18N.t(confirmKey))) return;
 
                 const workoutTitle = document.getElementById('workoutTitle').textContent;
 
@@ -195,7 +200,7 @@
                 // GATHERING DEBUG
                 console.log("Gathered Sets:", sets);
                 if (sets.length === 0) {
-                    alert('Log script found 0 sets! Please ensure you entered Weight or Reps.');
+                    alert(I18N.t('no_sets_alert'));
                     return;
                 }
                 // alert(`Debug: Sending ${sets.length} sets to backend.`);
@@ -225,7 +230,7 @@
                     });
 
                     if (res.ok) {
-                        alert(`Workout ${workoutId ? 'Updated' : 'Saved'}!`);
+                        alert(I18N.t(workoutId ? 'workout_updated' : 'workout_saved'));
                         window.location.href = '/dashboard.html';
                     } else {
                         const err = await res.json();

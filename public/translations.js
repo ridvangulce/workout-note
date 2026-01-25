@@ -1,5 +1,11 @@
 const TRANSLATIONS = {
     en: {
+        "title_index": "Workout API - Level Up Your Fitness",
+        "title_dashboard": "Dashboard - Workout API",
+        "title_login": "Login - Workout API",
+        "title_register": "Register - Workout API",
+        "title_logger": "Workout Logger - Workout API",
+
         // Nav & General
         "nav_features": "Features",
         "nav_docs": "Docs",
@@ -10,6 +16,7 @@ const TRANSLATIONS = {
         "nav_workouts": "My Workouts",
         "nav_exercises": "Exercises",
         "nav_history": "History",
+        "nav_cancel_back": "Cancel / Back",
 
         // Hero Section
         "hero_title": "Unleash Your <br><span class='gradient-text'>Fitness Potential</span>",
@@ -52,6 +59,21 @@ const TRANSLATIONS = {
         "past_workouts": "Past Workouts",
         "loading_history": "Loading history...",
 
+        // Logger
+        "finish_workout": "Finish Workout",
+        "update_workout": "Update Workout",
+        "loading": "Loading...",
+        "weight_label": "Weight",
+        "reps_label": "reps",
+        "rir_label": "RIR",
+        "note_label": "Note",
+        "add_set": "+ Add Set",
+        "workout_saved": "Workout Saved!",
+        "workout_updated": "Workout Updated!",
+        "confirm_finish": "Are you sure you want to finish this workout?",
+        "confirm_update": "Are you sure you want to update this workout?",
+        "no_sets_alert": "Log script found 0 sets! Please ensure you entered Weight or Reps.",
+
         // Modals
         "create_new_routine": "Create New Routine",
         "routine_name": "Routine Name",
@@ -93,6 +115,12 @@ const TRANSLATIONS = {
         "already_have_account": "Already have an account?"
     },
     tr: {
+        "title_index": "Workout API - Fitness Potansiyelini Keşfet",
+        "title_dashboard": "Dashboard - Workout API",
+        "title_login": "Giriş - Workout API",
+        "title_register": "Kayıt - Workout API",
+        "title_logger": "Antrenman Kaydı - Workout API",
+
         // Nav & General
         "nav_features": "Özellikler",
         "nav_docs": "Dokümanlar",
@@ -103,6 +131,7 @@ const TRANSLATIONS = {
         "nav_workouts": "Antrenmanlarım",
         "nav_exercises": "Egzersizler",
         "nav_history": "Geçmiş",
+        "nav_cancel_back": "Vazgeç / Geri",
 
         // Hero Section
         "hero_title": "Potansiyelini <br><span class='gradient-text'>Harekete Geçir</span>",
@@ -144,6 +173,21 @@ const TRANSLATIONS = {
         "history_title": "Geçmiş & Analiz",
         "past_workouts": "Geçmiş Antrenmanlar",
         "loading_history": "Geçmiş yükleniyor...",
+
+        // Logger
+        "finish_workout": "Antrenmanı Bitir",
+        "update_workout": "Antrenmanı Güncelle",
+        "loading": "Yükleniyor...",
+        "weight_label": "Ağırlık",
+        "reps_label": "tekrar",
+        "rir_label": "RIR",
+        "note_label": "Not",
+        "add_set": "+ Set Ekle",
+        "workout_saved": "Antrenman Kaydedildi!",
+        "workout_updated": "Antrenman Güncellendi!",
+        "confirm_finish": "Bu antrenmanı bitirmek istediğinizden emin misiniz?",
+        "confirm_update": "Bu antrenmanı güncellemek istediğinizden emin misiniz?",
+        "no_sets_alert": "Hiç set bulunamadı! Lütfen Ağırlık veya Tekrar giriniz.",
 
         // Modals
         "create_new_routine": "Yeni Rutin Oluştur",

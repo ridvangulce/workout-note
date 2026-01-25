@@ -94,10 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const exerciseTabFilter = document.getElementById('exerciseTabFilter');
     const routineExerciseFilter = document.getElementById('routineExerciseFilter');
 
-    const muscleOptions = MUSCLE_GROUPS.map(m => `<option value="${m}">${m}</option>`).join('');
+    const muscleOptions = MUSCLE_GROUPS.map(m => `<option value="${m}">${I18N.t('muscle_' + m)}</option>`).join('');
 
     if (targetMuscleSelect) {
-        targetMuscleSelect.innerHTML = '<option value="">Select Target Muscle...</option>' + muscleOptions;
+        targetMuscleSelect.innerHTML = `<option value="">${I18N.t('target_muscle_group')}</option>` + muscleOptions;
     }
     if (secondaryMuscleSelect) {
         secondaryMuscleSelect.innerHTML = muscleOptions;
@@ -111,9 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Select2
     if (typeof $ !== 'undefined' && $.fn.select2) {
-        $('#exerciseTabFilter').select2({ placeholder: "Filter by Muscle Groups...", allowClear: true }).on('change', filterExerciseTab);
-        $('#routineExerciseFilter').select2({ placeholder: "Filter by Muscles...", allowClear: true }).on('change', filterRoutineExercises);
-        $('#secondaryMuscleSelect').select2({ placeholder: "Select Secondary Muscles...", allowClear: true });
+        $('#exerciseTabFilter').select2({ placeholder: I18N.t('filter_muscles'), allowClear: true }).on('change', filterExerciseTab);
+        $('#routineExerciseFilter').select2({ placeholder: I18N.t('muscle_group_filter'), allowClear: true }).on('change', filterRoutineExercises);
+        $('#secondaryMuscleSelect').select2({ placeholder: I18N.t('secondary_muscles'), allowClear: true });
     }
 
     const createRoutineForm = document.getElementById('createRoutineForm');
@@ -281,10 +281,10 @@ async function updateDashboardUI() {
             const selectContainer = document.getElementById('exerciseSelectContainer');
 
             if (list) {
-                if (exercises.length === 0) list.innerHTML = '<div class="empty-state">No exercises found.</div>';
+                if (exercises.length === 0) list.innerHTML = `<div class="empty-state">${I18N.t('no_exercises_found')}</div>`;
                 else list.innerHTML = exercises.map(ex => `<div class="exercise-item"><span>${ex.name}</span></div>`).join('');
             }
-            if (exercises.length === 0) selectContainer.innerHTML = '<div class="empty-state">No exercises available</div>';
+            if (exercises.length === 0) selectContainer.innerHTML = `<div class="empty-state">${I18N.t('loading_exercises')}</div>`;
             else selectContainer.innerHTML = exercises.map(ex => `
                     <label class="exercise-checkbox-item" data-name="${ex.name.toLowerCase()}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}">
                         <input type="checkbox" value="${ex.id}" name="exercises">
@@ -294,7 +294,7 @@ async function updateDashboardUI() {
 
             // Render Draggable List
             if (list) {
-                if (exercises.length === 0) list.innerHTML = '<div class="empty-state">No exercises found. Add your first one!</div>';
+                if (exercises.length === 0) list.innerHTML = `<div class="empty-state">${I18N.t('no_exercises_found')}</div>`;
                 else {
                     list.innerHTML = exercises.map(ex => `
                             <div class="exercise-item" draggable="true" data-id="${ex.id}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}">
@@ -302,7 +302,7 @@ async function updateDashboardUI() {
                                     <span class="drag-handle">☰</span>
                                     <div style="display:flex; flex-direction:column;">
                                         <span class="exercise-name" style="font-weight:600;">${ex.name}</span>
-                                        ${ex.target_muscle_group ? `<span style="font-size:0.75rem; color:var(--text-muted);">${ex.target_muscle_group}${ex.secondary_muscles ? ' · ' + ex.secondary_muscles : ''}</span>` : ''}
+                                        ${ex.target_muscle_group ? `<span style="font-size:0.75rem; color:var(--text-muted);">${I18N.t('muscle_' + ex.target_muscle_group)}${ex.secondary_muscles ? ' · ' + ex.secondary_muscles.split(', ').map(m => I18N.t('muscle_' + m)).join(', ') : ''}</span>` : ''}
                                     </div>
                                 </div>
                                 <div class="exercise-actions">
@@ -378,7 +378,7 @@ async function updateDashboardUI() {
             `).join('');
 
             if (list) {
-                if (workouts.length === 0) list.innerHTML = '<div class="empty-state">No workout history found.</div>';
+                if (workouts.length === 0) list.innerHTML = `<div class="empty-state">${I18N.t('no_recent')}</div>`;
                 else list.innerHTML = historyHtml;
             }
 
@@ -436,8 +436,8 @@ window.openModal = function (modalId) {
         // Reset Logic for Add/Edit Exercise
         if (modalId === 'addExerciseModal' && !currentEditingExerciseId) {
             document.getElementById('addExerciseForm').reset();
-            document.getElementById('addExerciseModalTitle').textContent = 'Add New Exercise';
-            document.getElementById('addExerciseSubmitBtn').textContent = 'Add Exercise';
+            document.getElementById('addExerciseModalTitle').textContent = I18N.t('add_new_exercise');
+            document.getElementById('addExerciseSubmitBtn').textContent = I18N.t('add_exercise');
             currentEditingExerciseId = null;
             if ($.fn.select2) {
                 $('#secondaryMuscleSelect').val(null).trigger('change');
@@ -574,8 +574,8 @@ window.editExercise = async function (id, name, target, secondary) {
     document.getElementById('exerciseName').value = name;
     document.getElementById('targetMuscle').value = target || "";
 
-    document.getElementById('addExerciseModalTitle').textContent = 'Edit Exercise';
-    document.getElementById('addExerciseSubmitBtn').textContent = 'Update Exercise';
+    document.getElementById('addExerciseModalTitle').textContent = I18N.t('edit_exercise');
+    document.getElementById('addExerciseSubmitBtn').textContent = I18N.t('update_exercise');
 
     // Set secondary muscles using Select2
     const secondaryArray = secondary ? secondary.split(',').map(s => s.trim()) : [];
