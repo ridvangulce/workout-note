@@ -1,32 +1,39 @@
 const fs = require("fs");
 const path = require("path");
-const AppError = require("../errors/AppError");
 
 module.exports = (err, req, res, next) => {
   const status = err.statusCode || 500;
-  const logDir = path.join(__dirname, "../../logs");
-  const logFile = path.join(logDir, "error.log");
 
-  if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-  }
+  // Vercel serverless ortamında dosyaya yazmak sorun çıkarır.
+  // Local'de dosyaya yaz, Vercel'de sadece console'a yaz.
+  const isVercel = !!process.env.VERCEL;
 
-  const logLine = `[${new Date().toISOString()}] ${req.method} ${req.url} | ${status} | ${err.message}\n`;
+  if (!isVercel) {
+    const logDir = path.join(process.cwd(), "logs");
+    const logFile = path.join(logDir, "error.log");
 
-  fs.appendFile(logFile, logLine, (fsErr) => {
-    if (fsErr) {
+    try {
+      if (!fs.existsSync(logDir)) {
+        fs.mkdirSync(logDir, { recursive: true });
+      }
+
+      const logLine = `[${new Date().toISOString()}] ${req.method} ${req.url} | ${status} | ${err.message}\n`;
+
+      fs.appendFileSync(logFile, logLine);
+    } catch (fsErr) {
       console.error("Log Yazılamadı:", fsErr);
     }
-  });
+  }
+
+  // Vercel logs'a düşer
+  console.error(`[ERROR] ${req.method} ${req.url} | ${status} | ${err.message}`);
+  if (err.stack) console.error(err.stack);
 
   if (err.isOperational) {
-    console.error(`[OPERATIONAL ERROR] ${status} - ${err.message}`); // Log to console for dev visibility
     return res.status(status).json({
       error: err.message,
     });
   }
-
-  console.error("UNEXPECTED ERROR:", err);
 
   return res.status(500).json({
     error: "Internal Server Error",
