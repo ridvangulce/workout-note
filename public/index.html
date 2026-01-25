@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout API - Level Up Your Fitness</title>
+    <title data-i18n="title_index">Workout API - Level Up Your Fitness</title>
     <meta name="description"
         content="The ultimate workout tracking API for developers and fitness enthusiasts. Track workouts, exercises, and sets with ease.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,35 +19,38 @@
     <nav class="navbar">
         <div class="logo">Workout<span class="highlight">API</span></div>
         <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#docs">Docs</a>
-            <a href="/login.html" id="loginBtn" class="btn btn-secondary">Login</a>
-            <a href="/register.html" id="registerBtn" class="btn btn-primary">Get Started</a>
+            <a href="#features" data-i18n="nav_features">Features</a>
+            <a href="#docs" data-i18n="nav_docs">Docs</a>
+            <a href="/login.html" id="loginBtn" class="btn btn-secondary" data-i18n="nav_login">Login</a>
+            <a href="/register.html" id="registerBtn" class="btn btn-primary" data-i18n="nav_get_started">Get
+                Started</a>
         </div>
     </nav>
 
     <header class="hero">
         <div class="hero-content">
-            <h1>Unleash Your <br><span class="gradient-text">Fitness Potential</span></h1>
-            <p>The most powerful and flexible API to build your next fitness application or track your personal
+            <h1 data-i18n="hero_title">Unleash Your <br><span class="gradient-text">Fitness Potential</span></h1>
+            <p data-i18n="hero_subtitle">The most powerful and flexible API to build your next fitness application or
+                track your personal
                 progress. Secure, fast, and easy to use.</p>
             <div class="cta-group">
-                <a href="/register.html" class="btn btn-large btn-primary">Start Building Now</a>
-                <a href="#docs" class="btn btn-large btn-outline">View Documentation</a>
+                <a href="/register.html" class="btn btn-large btn-primary" data-i18n="start_building">Start Building
+                    Now</a>
+                <a href="#docs" class="btn btn-large btn-outline" data-i18n="view_docs">View Documentation</a>
             </div>
 
             <div class="stats-container">
                 <div class="stat-item">
                     <span class="stat-number">100+</span>
-                    <span class="stat-label">Exercises</span>
+                    <span class="stat-label" data-i18n="stat_exercises">Exercises</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">99.9%</span>
-                    <span class="stat-label">Uptime</span>
+                    <span class="stat-label" data-i18n="stat_uptime">Uptime</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-number">FAST</span>
-                    <span class="stat-label">Response</span>
+                    <span class="stat-label" data-i18n="stat_response">Response</span>
                 </div>
             </div>
         </div>
@@ -72,22 +75,24 @@
     </header>
 
     <section id="features" class="features">
-        <h2>Why Choose <span class="highlight">WorkoutAPI</span>?</h2>
+        <h2 data-i18n="why_choose">Why Choose <span class="highlight">WorkoutAPI</span>?</h2>
         <div class="feature-grid">
             <div class="feature-card">
                 <div class="icon">🔒</div>
-                <h3>Secure Authentication</h3>
-                <p>Industry-standard JWT authentication keeps your user data safe and secure.</p>
+                <h3 data-i18n="feature_auth_title">Secure Authentication</h3>
+                <p data-i18n="feature_auth_desc">Industry-standard JWT authentication keeps your user data safe and
+                    secure.</p>
             </div>
             <div class="feature-card">
                 <div class="icon">⚡</div>
-                <h3>Lightning Fast</h3>
-                <p>Built on Node.js and Express for maximum performance and low latency.</p>
+                <h3 data-i18n="feature_fast_title">Lightning Fast</h3>
+                <p data-i18n="feature_fast_desc">Built on Node.js and Express for maximum performance and low latency.
+                </p>
             </div>
             <div class="feature-card">
                 <div class="icon">📊</div>
-                <h3>Detailed Tracking</h3>
-                <p>Log every set, rep, and weight. Visualize progress over time.</p>
+                <h3 data-i18n="feature_track_title">Detailed Tracking</h3>
+                <p data-i18n="feature_track_desc">Log every set, rep, and weight. Visualize progress over time.</p>
             </div>
         </div>
     </section>
@@ -96,6 +101,8 @@
         <p>&copy; 2025 Workout API. All rights reserved.</p>
     </footer>
 
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
     <script src="app.v2.js"></script>
 </body>
 
