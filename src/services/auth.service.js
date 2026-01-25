@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken")
 const crypto = require("crypto");
 const AppError = require("../errors/AppError");
 
+const exerciseRepo = require("../repositories/exercise.repository");
+const defaultExercises = require("../constants/defaultExercises");
+
 const register = async (email, password, userId) => {
     if (userId) {
         throw new AppError("User already logged in!", 402);
@@ -22,38 +25,51 @@ const register = async (email, password, userId) => {
     const registerQuery = await authRepo.register(
         email,
         hashedPassword
-    )
+    );
+
+    // Seed Default Exercises
+    if (registerQuery && registerQuery[0]) {
+        const newUserId = registerQuery[0].id;
+        await exerciseRepo.createBatch(newUserId, defaultExercises);
+    }
+
     return registerQuery;
 };
 
 const login = async (userId, email, password) => {
-  if (userId) throw new AppError("User already logged in!", 400);
-  if (!email) throw new AppError("Email is required!", 400);
-  if (!password) throw new AppError("Password is required!", 400);
+    if (userId) throw new AppError("User already logged in!", 400);
+    if (!email) throw new AppError("Email is required!", 400);
+    if (!password) throw new AppError("Password is required!", 400);
 
-  const user = await authRepo.getUserByEmail(email);
-  if (!user) throw new AppError("Invalid credentials!", 401);
-  const isValid = await bcrypt.compare(password, user.password_hash);
-  if (!isValid) throw new AppError("Invalid credentials!", 401);
+    const user = await authRepo.getUserByEmail(email);
+    if (!user) {
+        console.error(`[AUTH DEBUG] Login failed: User not found for email ${email}`);
+        throw new AppError("Invalid credentials!", 401);
+    }
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) {
+        console.error(`[AUTH DEBUG] Login failed: Password mismatch for user ${email}`);
+        throw new AppError("Invalid credentials!", 401);
+    }
 
-  const accessToken = jwt.sign(
-    { sub: user.id },
-    process.env.JWT_SECRET,
-    { expiresIn: "10m" }
-  );
+    const accessToken = jwt.sign(
+        { sub: user.id },
+        process.env.JWT_SECRET,
+        { expiresIn: "10m" }
+    );
 
-  const refreshToken = crypto.randomBytes(64).toString("hex");
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7);
+    const refreshToken = crypto.randomBytes(64).toString("hex");
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
-  await authRepo.saveRefreshToken(user.id, refreshToken, expiresAt);
+    await authRepo.saveRefreshToken(user.id, refreshToken, expiresAt);
 
-  return {
-    accessToken,
-    refreshToken,
-    expiresAt,
-    user: { id: user.id, email: user.email}
-  };
+    return {
+        accessToken,
+        refreshToken,
+        expiresAt,
+        user: { id: user.id, email: user.email }
+    };
 };
 
 const refresh = async (refreshToken) => {

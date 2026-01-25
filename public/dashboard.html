@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Workout API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Inline auth check to prevent flash of content
+        if (!localStorage.getItem('workout_token')) {
+            window.location.href = '/login.html';
+        }
+    </script>
+</head>
+
+<body class="dashboard-page">
+    <div class="background-glow"></div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Workout<span class="highlight">API</span></a>
+        <div class="nav-links">
+            <!-- Populated by JS -->
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="user-profile">
+                <div class="avatar">
+                    <span id="userInitials">U</span>
+                </div>
+                <div class="user-info">
+                    <h3 id="userName">User Name</h3>
+                    <p>Free Plan</p>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#" data-view="overview">Overview</a></li>
+                <li><a href="#" data-view="workouts">My Workouts</a></li>
+                <li><a href="#" data-view="exercises">Exercises</a></li>
+                <li><a href="#" data-view="history">History</a></li>
+            </ul>
+        </aside>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <main class="main-content">
+            <!-- Overview View -->
+            <div id="overview-view" class="view-section active">
+                <header class="dashboard-header">
+                    <h2>Overview</h2>
+                    <button class="btn btn-primary" onclick="switchView('workouts')">+ New Workout</button>
+                </header>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏋️</div>
+                        <div class="stat-details">
+                            <h3>Total Workouts</h3>
+                            <p class="stat-value" id="totalWorkouts">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="recent-activity">
+                    <h3>Recent Activity</h3>
+                    <div class="empty-state">
+                        <p>No recent workouts found. Start your journey today!</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Workouts View -->
+            <div id="workouts-view" class="view-section" style="display: none;">
+                <header class="dashboard-header">
+                    <h2>My Routines</h2>
+                    <button class="btn btn-primary" onclick="openModal('createRoutineModal')">+ Create Routine</button>
+                </header>
+
+                <div id="routinesList" class="routines-grid">
+                    <!-- Routines will be populated here -->
+                    <div class="empty-state">Loading routines...</div>
+                </div>
+            </div>
+
+            <!-- Exercises View -->
+            <div id="exercises-view" class="view-section" style="display: none;">
+                <header class="dashboard-header">
+                    <h2>Exercises</h2>
+                    <button class="btn btn-primary" onclick="openModal('addExerciseModal')">+ Add Exercise</button>
+                </header>
+
+                <div class="exercises-container">
+                    <div id="exercisesList" class="exercises-grid">
+                        <!-- Exercises will be populated here -->
+                        <div class="empty-state">Loading exercises...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History View -->
+            <div id="history-view" class="view-section" style="display: none;">
+                <header class="dashboard-header">
+                    <h2>History & Analytics</h2>
+                </header>
+
+                <div class="chart-container"
+                    style="background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                    <canvas id="workoutChart" style="width: 100%; height: 300px;"></canvas>
+                </div>
+
+                <h3 style="margin-bottom: 1rem;">Past Workouts</h3>
+                <div id="historyList" class="routines-grid">
+                    <div class="empty-state">Loading history...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Routine Modal -->
+    <div id="createRoutineModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('createRoutineModal')">&times;</span>
+            <h2 id="createRoutineModalTitle">Create New Routine</h2>
+            <form id="createRoutineForm">
+                <div class="form-group">
+                    <label for="routineName">Routine Name</label>
+                    <input type="text" id="routineName" name="routineName" required placeholder="e.g., Pull Day">
+                </div>
+                <div class="form-group">
+                    <label>Select Exercises</label>
+                    <input type="text" id="exerciseSearch" placeholder="Filter exercises..."
+                        style="margin-bottom: 0.5rem; padding: 0.5rem; width: 100%; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color);">
+                    <div id="exerciseSelectContainer" class="exercise-select-container">
+                        <!-- Checkboxes will be populated here -->
+                    </div>
+                </div>
+                <button type="submit" id="createRoutineSubmitBtn" class="btn btn-primary btn-block">Save
+                    Routine</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Exercise Modal -->
+    <div id="addExerciseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('addExerciseModal')">&times;</span>
+            <h2>Add New Exercise</h2>
+            <form id="addExerciseForm">
+                <div class="form-group">
+                    <label for="exerciseName">Exercise Name</label>
+                    <input type="text" id="exerciseName" name="exerciseName" required
+                        placeholder="e.g., Incline Dumbbell Press">
+                </div>
+                <div class="form-group">
+                    <label for="targetMuscle">Target Muscle Group</label>
+                    <input type="text" id="targetMuscle" name="targetMuscle" placeholder="e.g., Chest">
+                </div>
+                <div class="form-group">
+                    <label for="secondaryMuscles">Secondary Muscles</label>
+                    <input type="text" id="secondaryMuscles" name="secondaryMuscles"
+                        placeholder="e.g., Triceps, Shoulders">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Add Exercise</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.v2.js"></script>
+</body>
+
+</html>
