@@ -1,12 +1,12 @@
 const pool = require("../config/db");
 
-const register = async (email, hashedPassword) => {
+const register = async (email, hashedPassword, fullName) => {
     const result = await pool.query(
         `
-        INSERT INTO users(email, password_hash)
-        VALUES($1, $2)
+        INSERT INTO users(email, password_hash, full_name)
+        VALUES($1, $2, $3)
         RETURNING *
-        `, [email, hashedPassword]
+        `, [email, hashedPassword, fullName]
     );
     return result.rows;
 }
@@ -18,7 +18,7 @@ const checkUser = async (email) => {
         FROM users
         WHERE email = $1
         LIMIT 1
-        `,[email]
+        `, [email]
     )
     return result.rows[0];
 }
@@ -26,7 +26,7 @@ const checkUser = async (email) => {
 const getUserByEmail = async (email) => {
     const result = await pool.query(
         `
-        SELECT id, email, password_hash, created_at
+        SELECT id, email, password_hash, created_at, full_name
         FROM users
         WHERE email = $1
         LIMIT 1
@@ -41,7 +41,7 @@ const saveRefreshToken = async (userId, refreshToken, expiresAt) => {
         INSERT INTO refresh_tokens(user_id, token, expires_at)
         VALUES($1, $2, $3)
         RETURNING *
-        `,[userId, refreshToken, expiresAt]
+        `, [userId, refreshToken, expiresAt]
     )
     return result.rows[0];
 }
@@ -59,7 +59,7 @@ const findRefreshToken = async (refreshToken) => {
 
 const deleteRefreshToken = async (token) => {
     await pool.query(
-    `
+        `
     DELETE FROM refresh_tokens
     WHERE token = $1
     `,

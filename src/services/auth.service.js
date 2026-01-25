@@ -7,7 +7,7 @@ const AppError = require("../errors/AppError");
 const exerciseRepo = require("../repositories/exercise.repository");
 const defaultExercises = require("../constants/defaultExercises");
 
-const register = async (email, password, userId) => {
+const register = async (email, password, fullName, userId) => {
     if (userId) {
         throw new AppError("User already logged in!", 402);
     }
@@ -24,7 +24,8 @@ const register = async (email, password, userId) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const registerQuery = await authRepo.register(
         email,
-        hashedPassword
+        hashedPassword,
+        fullName
     );
 
     // Seed Default Exercises
@@ -68,7 +69,7 @@ const login = async (userId, email, password) => {
         accessToken,
         refreshToken,
         expiresAt,
-        user: { id: user.id, email: user.email }
+        user: { id: user.id, email: user.email, name: user.full_name }
     };
 };
 

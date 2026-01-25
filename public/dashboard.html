@@ -132,10 +132,8 @@
     <div class="background-glow"></div>
 
     <nav class="navbar">
-        <a href="/" class="logo">Workout<span class="highlight">API</span></a>
-        <div class="nav-links">
-            <!-- Populated by JS -->
-        </div>
+        <a href="/" class="logo">Workout<span class="highlight">Note</span></a>
+        <div class="nav-links"></div>
     </nav>
 
     <div class="dashboard-container">
@@ -165,6 +163,10 @@
             <div id="overview-view" class="view-section active">
                 <header class="dashboard-header">
                     <h2 data-i18n="nav_overview">Overview</h2>
+                    <div style="flex:1; margin-left:1.5rem; font-size:1.1rem; color:var(--text-muted);">
+                        <span data-i18n="welcome_back">Welcome Back,</span> <span id="userNameDisplay"
+                            style="color:var(--primary-color); font-weight:600;">User</span>!
+                    </div>
                     <button class="btn btn-primary" onclick="switchView('workouts')" data-i18n="new_workout">+ New
                         Workout</button>
                 </header>
