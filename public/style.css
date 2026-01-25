@@ -64,6 +64,7 @@ body {
     color: var(--primary-color);
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -82,6 +83,30 @@ body {
 
 .nav-links a:hover {
     color: var(--text-color);
+}
+
+/* Language Switcher */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.lang-switcher button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.3s;
+    font-family: inherit;
+}
+
+.lang-switcher button:hover, .lang-switcher button.active {
+    color: var(--primary-color);
 }
 
 /* Buttons */

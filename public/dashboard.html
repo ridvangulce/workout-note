@@ -4,11 +4,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Workout API</title>
+    <title data-i18n="title_dashboard">Dashboard - Workout API</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Select2 Dark Theme Overrides */
+        .select2-container--default .select2-selection--multiple,
+        .select2-container--default .select2-selection--single {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 10px !important;
+            color: var(--text-color) !important;
+            min-height: 48px !important;
+            transition: all 0.3s ease;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--primary-color) !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 0 0 4px rgba(0, 242, 96, 0.1);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            border: none !important;
+            color: #fff !important;
+            font-weight: 600 !important;
+            border-radius: 6px !important;
+            padding: 2px 8px !important;
+            margin-top: 7px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #fff !important;
+            margin-right: 8px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+            padding-right: 5px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #eee !important;
+            background: none !important;
+        }
+
+        .select2-dropdown {
+            background-color: #1a1a24 !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .select2-results__option {
+            padding: 10px 15px !important;
+            color: var(--text-muted) !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--primary-color) !important;
+            color: #000 !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-color) !important;
+        }
+
+        .select2-search--dropdown .select2-search__field {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: #fff !important;
+            border-radius: 6px !important;
+        }
+
+        /* Body Map Styles */
+        .muscle-svg {
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+            transition: all 0.5s ease;
+        }
+
+        .body-silhouette {
+            fill: rgba(255, 255, 255, 0.03);
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1.5;
+        }
+
+        .muscle-path {
+            fill: rgba(255, 255, 255, 0.08);
+            stroke: rgba(255, 255, 255, 0.15);
+            stroke-width: 1;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .muscle-path:hover {
+            fill: rgba(0, 242, 96, 0.25);
+            stroke: var(--primary-color);
+            filter: url(#glow);
+        }
+
+        .muscle-path.active {
+            fill: rgba(0, 242, 96, 0.7) !important;
+            stroke: var(--primary-color) !important;
+            filter: drop-shadow(0 0 12px var(--primary-color));
+        }
+
+        .muscle-map-view h3 {
+            letter-spacing: 2px;
+            font-weight: 700;
+            opacity: 0.6;
+        }
+    </style>
     <script>
         // Inline auth check to prevent flash of content
         if (!localStorage.getItem('workout_token')) {
@@ -40,10 +151,10 @@
             </div>
 
             <ul class="sidebar-menu">
-                <li class="active"><a href="#" data-view="overview">Overview</a></li>
-                <li><a href="#" data-view="workouts">My Workouts</a></li>
-                <li><a href="#" data-view="exercises">Exercises</a></li>
-                <li><a href="#" data-view="history">History</a></li>
+                <li class="active"><a href="#" data-view="overview" data-i18n="nav_overview">Overview</a></li>
+                <li><a href="#" data-view="workouts" data-i18n="nav_workouts">My Workouts</a></li>
+                <li><a href="#" data-view="exercises" data-i18n="nav_exercises">Exercises</a></li>
+                <li><a href="#" data-view="history" data-i18n="nav_history">History</a></li>
             </ul>
         </aside>
 
@@ -53,24 +164,25 @@
             <!-- Overview View -->
             <div id="overview-view" class="view-section active">
                 <header class="dashboard-header">
-                    <h2>Overview</h2>
-                    <button class="btn btn-primary" onclick="switchView('workouts')">+ New Workout</button>
+                    <h2 data-i18n="nav_overview">Overview</h2>
+                    <button class="btn btn-primary" onclick="switchView('workouts')" data-i18n="new_workout">+ New
+                        Workout</button>
                 </header>
 
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">🏋️</div>
                         <div class="stat-details">
-                            <h3>Total Workouts</h3>
+                            <h3 data-i18n="total_workouts">Total Workouts</h3>
                             <p class="stat-value" id="totalWorkouts">0</p>
                         </div>
                     </div>
                 </div>
 
                 <section class="recent-activity">
-                    <h3>Recent Activity</h3>
+                    <h3 data-i18n="recent_activity">Recent Activity</h3>
                     <div class="empty-state">
-                        <p>No recent workouts found. Start your journey today!</p>
+                        <p data-i18n="no_recent">No recent workouts found. Start your journey today!</p>
                     </div>
                 </section>
             </div>
@@ -78,8 +190,9 @@
             <!-- Workouts View -->
             <div id="workouts-view" class="view-section" style="display: none;">
                 <header class="dashboard-header">
-                    <h2>My Routines</h2>
-                    <button class="btn btn-primary" onclick="openModal('createRoutineModal')">+ Create Routine</button>
+                    <h2 data-i18n="nav_workouts">My Workouts</h2>
+                    <button class="btn btn-primary" onclick="openModal('createRoutineModal')"
+                        data-i18n="create_new_routine">+ Create Routine</button>
                 </header>
 
                 <div id="routinesList" class="routines-grid">
@@ -91,9 +204,47 @@
             <!-- Exercises View -->
             <div id="exercises-view" class="view-section" style="display: none;">
                 <header class="dashboard-header">
-                    <h2>Exercises</h2>
-                    <button class="btn btn-primary" onclick="openModal('addExerciseModal')">+ Add Exercise</button>
+                    <h2 data-i18n="exercises_title">Exercises</h2>
+                    <button class="btn btn-primary" onclick="openModal('addExerciseModal')" data-i18n="add_exercise">+
+                        Add Exercise</button>
                 </header>
+
+                <div class="filter-bar" style="margin-bottom: 1rem; display: flex; align-items: center; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label style="display:block; font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;"
+                            data-i18n="filter_muscles">Filter
+                            by Muscle Groups</label>
+                        <select id="exerciseTabFilter" multiple="multiple" style="width: 100%;">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <button class="btn btn-outline" id="toggleBodyMap"
+                        style="margin-top: 1.5rem; padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>👤</span> <span id="toggleMapText" data-i18n="show_body_map">Show Body Map</span>
+                    </button>
+                </div>
+
+                <!-- Interactive Body Map Container -->
+                <div id="bodyMapContainer"
+                    style="display: none; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; transition: all 0.3s ease;">
+                    <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;">
+                        <div class="muscle-map-view">
+                            <h3 style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;"
+                                data-i18n="body_front">
+                                FRONT</h3>
+                            <div id="human-front-svg"></div>
+                        </div>
+                        <div class="muscle-map-view">
+                            <h3 style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;"
+                                data-i18n="body_back">
+                                BACK</h3>
+                            <div id="human-back-svg"></div>
+                        </div>
+                    </div>
+                    <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 1.5rem;"
+                        data-i18n="body_tip">Tip:
+                        Click on muscles to filter the list</p>
+                </div>
 
                 <div class="exercises-container">
                     <div id="exercisesList" class="exercises-grid">
@@ -106,7 +257,7 @@
             <!-- History View -->
             <div id="history-view" class="view-section" style="display: none;">
                 <header class="dashboard-header">
-                    <h2>History & Analytics</h2>
+                    <h2 data-i18n="history_title">History & Analytics</h2>
                 </header>
 
                 <div class="chart-container"
@@ -114,7 +265,7 @@
                     <canvas id="workoutChart" style="width: 100%; height: 300px;"></canvas>
                 </div>
 
-                <h3 style="margin-bottom: 1rem;">Past Workouts</h3>
+                <h3 style="margin-bottom: 1rem;" data-i18n="past_workouts">Past Workouts</h3>
                 <div id="historyList" class="routines-grid">
                     <div class="empty-state">Loading history...</div>
                 </div>
@@ -126,21 +277,35 @@
     <div id="createRoutineModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('createRoutineModal')">&times;</span>
-            <h2 id="createRoutineModalTitle">Create New Routine</h2>
+            <h2 id="createRoutineModalTitle" data-i18n="create_new_routine">Create New Routine</h2>
             <form id="createRoutineForm">
                 <div class="form-group">
-                    <label for="routineName">Routine Name</label>
-                    <input type="text" id="routineName" name="routineName" required placeholder="e.g., Pull Day">
+                    <label for="routineName" data-i18n="routine_name">Routine Name</label>
+                    <input type="text" id="routineName" name="routineName" required placeholder="e.g., Pull Day"
+                        data-i18n="routine_name">
                 </div>
                 <div class="form-group">
-                    <label>Select Exercises</label>
-                    <input type="text" id="exerciseSearch" placeholder="Filter exercises..."
-                        style="margin-bottom: 0.5rem; padding: 0.5rem; width: 100%; border-radius: 6px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color);">
+                    <label data-i18n="select_exercises">Select Exercises</label>
+                    <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem;">
+                        <input type="text" id="exerciseSearch" placeholder="Search by name..."
+                            style="padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color);"
+                            data-i18n="search_by_name">
+                        <div>
+                            <label
+                                style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;"
+                                data-i18n="muscle_group_filter">Muscle
+                                Group Filter</label>
+                            <select id="routineExerciseFilter" multiple="multiple" style="width: 100%;">
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                    </div>
                     <div id="exerciseSelectContainer" class="exercise-select-container">
                         <!-- Checkboxes will be populated here -->
                     </div>
                 </div>
-                <button type="submit" id="createRoutineSubmitBtn" class="btn btn-primary btn-block">Save
+                <button type="submit" id="createRoutineSubmitBtn" class="btn btn-primary btn-block"
+                    data-i18n="save_routine">Save
                     Routine</button>
             </form>
         </div>
@@ -150,27 +315,39 @@
     <div id="addExerciseModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('addExerciseModal')">&times;</span>
-            <h2>Add New Exercise</h2>
+            <h2 id="addExerciseModalTitle" data-i18n="add_new_exercise">Add New Exercise</h2>
             <form id="addExerciseForm">
                 <div class="form-group">
-                    <label for="exerciseName">Exercise Name</label>
+                    <label for="exerciseName" data-i18n="exercise_name">Exercise Name</label>
                     <input type="text" id="exerciseName" name="exerciseName" required
-                        placeholder="e.g., Incline Dumbbell Press">
+                        placeholder="e.g., Incline Dumbbell Press" data-i18n="exercise_name">
                 </div>
                 <div class="form-group">
-                    <label for="targetMuscle">Target Muscle Group</label>
-                    <input type="text" id="targetMuscle" name="targetMuscle" placeholder="e.g., Chest">
+                    <label for="targetMuscle" data-i18n="target_muscle_group">Target Muscle Group</label>
+                    <select id="targetMuscle" name="targetMuscle" required
+                        style="width: 100%; padding: 0.8rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-color);">
+                        <option value="" data-i18n="target_muscle_group">Select Target Muscle...</option>
+                        <!-- Populated by JS -->
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="secondaryMuscles">Secondary Muscles</label>
-                    <input type="text" id="secondaryMuscles" name="secondaryMuscles"
-                        placeholder="e.g., Triceps, Shoulders">
+                    <label data-i18n="secondary_muscles">Secondary Muscles</label>
+                    <select id="secondaryMuscleSelect" multiple="multiple" style="width: 100%;">
+                        <!-- Populated by JS -->
+                    </select>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Add Exercise</button>
+                <button type="submit" id="addExerciseSubmitBtn" class="btn btn-primary btn-block"
+                    data-i18n="add_exercise">Add Exercise</button>
             </form>
         </div>
     </div>
 
+    <!-- Core Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="body-map.js"></script>
     <script src="app.v2.js"></script>
 </body>
 

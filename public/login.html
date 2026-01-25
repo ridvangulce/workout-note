@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Workout API</title>
+    <title data-i18n="title_login">Login - Workout API</title>
     <meta name="description" content="Login to your Workout API account.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,31 +21,34 @@
 
     <div class="auth-container">
         <div class="auth-card">
-            <h2>Welcome Back</h2>
-            <p>Enter your credentials to access your account.</p>
+            <h2 data-i18n="login_title">Welcome Back</h2>
+            <p data-i18n="login_desc">Enter your credentials to access your fitness dashboard</p>
+
+            <div id="formMessage" class="form-message"></div>
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required placeholder="you@example.com">
+                    <label for="email" data-i18n="email_label">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="name@company.com">
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password" data-i18n="password_label">Password</label>
                     <input type="password" id="password" name="password" required placeholder="••••••••">
                 </div>
 
-                <div id="formMessage" class="form-message"></div>
+                <button type="submit" class="btn btn-primary btn-block" data-i18n="nav_login">Login</button>
 
-                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                <div class="auth-footer">
+                    <span data-i18n="dont_have_account">Don't have an account?</span> <a href="/register.html"
+                        class="link" data-i18n="nav_get_started">Get Started</a>
+                </div>
             </form>
-
-            <div class="auth-footer">
-                <p>Don't have an account? <a href="/register.html" class="link">Get Started</a></p>
-            </div>
         </div>
     </div>
 
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
     <script src="app.v2.js"></script>
 </body>
 
