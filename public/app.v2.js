@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateDashboardUI(); // Refresh list
                     addExerciseForm.reset();
                 } else {
-                    alert('Failed to save exercise');
+                    alert(I18N.t('failed_save_exercise'));
                 }
             } catch (err) { console.error(err); }
         });
@@ -179,14 +179,14 @@ async function handleLogin(e) {
                     localStorage.setItem('workout_user', JSON.stringify(data.user));
                 }
             }
-            showMessage('success', 'Login successful! Redirecting...');
+            showMessage('success', I18N.t('login_success'));
             setTimeout(() => { window.location.href = '/dashboard.html'; }, 1000);
         } else {
-            showMessage('error', data.error || data.message || 'Login failed');
+            showMessage('error', data.error === 'Invalid credentials' ? I18N.t('invalid_credentials') : (data.error || data.message || I18N.t('error_generic')));
         }
     } catch (error) {
         console.error(error);
-        showMessage('error', 'An error occurred.');
+        showMessage('error', I18N.t('error_generic'));
     } finally {
         setLoading(btn, false);
     }
@@ -210,14 +210,14 @@ async function handleRegister(e) {
         const data = await response.json();
 
         if (response.ok) {
-            showMessage('success', 'Account created! Redirecting...');
+            showMessage('success', I18N.t('register_success'));
             setTimeout(() => { window.location.href = '/login.html'; }, 1500);
         } else {
-            showMessage('error', data.error || data.message || 'Registration failed');
+            showMessage('error', data.error || data.message || I18N.t('error_generic'));
         }
     } catch (error) {
         console.error(error);
-        showMessage('error', 'An error occurred.');
+        showMessage('error', I18N.t('error_generic'));
     } finally {
         setLoading(btn, false);
     }
@@ -241,9 +241,9 @@ function updateAuthUI() {
         if (token) {
             const user = JSON.parse(localStorage.getItem('workout_user') || '{}');
             navLinks.innerHTML = `
-                <a href="/dashboard.html">Dashboard</a>
-                <span class="user-greeting" style="color:var(--text-muted); font-size: 0.9rem;">Hi, ${user.name || 'User'}</span>
-                <a href="#" id="logoutBtn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Logout</a>
+                <a href="/dashboard.html" data-i18n="nav_overview">${I18N.t('nav_overview')}</a>
+                <span class="user-greeting" style="color:var(--text-muted); font-size: 0.9rem;">${I18N.t('welcome_back').split(',')[0]} ${user.name || 'User'}</span>
+                <a href="#" id="logoutBtn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;" data-i18n="nav_logout">${I18N.t('nav_logout')}</a>
             `;
             setTimeout(() => {
                 const logoutBtn = document.getElementById('logoutBtn');
@@ -251,10 +251,10 @@ function updateAuthUI() {
             }, 0);
         } else {
             navLinks.innerHTML = `
-                <a href="/#features">Features</a>
-                <a href="/#docs">Docs</a>
-                <a href="/login.html" class="btn btn-secondary">Login</a>
-                <a href="/register.html" class="btn btn-primary">Get Started</a>
+                <a href="/#features" data-i18n="nav_features">${I18N.t('nav_features')}</a>
+                <a href="/#docs" data-i18n="nav_docs">${I18N.t('nav_docs')}</a>
+                <a href="/login.html" class="btn btn-secondary" data-i18n="nav_login">${I18N.t('nav_login')}</a>
+                <a href="/register.html" class="btn btn-primary" data-i18n="nav_get_started">${I18N.t('nav_get_started')}</a>
             `;
         }
     }
@@ -268,6 +268,11 @@ async function updateDashboardUI() {
 
     if (userNameEl) userNameEl.textContent = user.name || 'User';
     if (userInitialsEl) userInitialsEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
+
+    const nameDisplay = document.getElementById('userNameDisplay');
+    if (nameDisplay) {
+        nameDisplay.textContent = user.name || (user.email ? user.email.split('@')[0] : 'User');
+    }
 
     const token = localStorage.getItem('workout_token');
     if (!token) return;
@@ -369,10 +374,10 @@ async function updateDashboardUI() {
                         </div>
                     </div>
                     <div class="routine-exercises" style="font-weight: 500; color: var(--text-color);">
-                        ${w.note || 'No notes'}
+                        ${w.note || I18N.t('no_notes')}
                     </div>
                     <div class="routine-exercises">
-                        Total Sets: ${w.total_sets || 0}
+                        ${I18N.t('total_sets_label')} ${w.total_sets || 0}
                     </div>
                 </div>
             `).join('');
@@ -382,26 +387,25 @@ async function updateDashboardUI() {
                 else list.innerHTML = historyHtml;
             }
 
-            // Populate Recent Activity on Overview tab
             const recentActivityContainer = document.querySelector('.recent-activity');
             if (recentActivityContainer) {
                 if (workouts.length === 0) {
-                    recentActivityContainer.innerHTML = '<h3>Recent Activity</h3><div class="empty-state"><p>No recent workouts found. Start your journey today!</p></div>';
+                    recentActivityContainer.innerHTML = `<h3 data-i18n="recent_activity_title">${I18N.t('recent_activity_title')}</h3><div class="empty-state"><p data-i18n="no_recent">${I18N.t('no_recent')}</p></div>`;
                 } else {
                     // Show last 3
                     const recentHtml = workouts.slice(0, 3).map(w => `
                         <div class="routine-card" style="margin-bottom: 1rem;">
                             <div class="routine-header" style="display:flex; justify-content:space-between;">
                                 <div class="routine-title">${new Date(w.workout_date).toLocaleDateString()}</div>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">${w.total_sets || 0} Sets</span>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">${w.total_sets || 0} ${I18N.t('sets_unit')}</span>
                             </div>
                             <div class="routine-exercises" style="margin-top: 0.5rem; font-size: 0.9rem;">
-                                ${w.note || 'No notes'}
+                                ${w.note || I18N.t('no_notes')}
                             </div>
                         </div>
                     `).join('');
-                    recentActivityContainer.innerHTML = '<h3>Recent Activity</h3>' + recentHtml +
-                        '<button class="btn btn-outline btn-sm" style="width:100%; margin-top:0.5rem;" onclick="switchView(\'history\')">View All History</button>';
+                    recentActivityContainer.innerHTML = `<h3 data-i18n="recent_activity_title">${I18N.t('recent_activity_title')}</h3>` + recentHtml +
+                        `<button data-i18n="view_all_history" class="btn btn-outline btn-sm" style="width:100%; margin-top:0.5rem;" onclick="switchView('history')">${I18N.t('view_all_history')}</button>`;
                 }
             }
 
@@ -429,8 +433,8 @@ window.openModal = function (modalId) {
         // Reset Logic for Create Routine
         if (modalId === 'createRoutineModal' && !currentEditingRoutineId) {
             document.getElementById('createRoutineForm').reset();
-            document.getElementById('createRoutineModalTitle').textContent = 'Create New Routine';
-            document.getElementById('createRoutineSubmitBtn').textContent = 'Save Routine';
+            document.getElementById('createRoutineModalTitle').textContent = I18N.t('create_new_routine');
+            document.getElementById('createRoutineSubmitBtn').textContent = I18N.t('save_routine');
             currentEditingRoutineId = null;
         }
         // Reset Logic for Add/Edit Exercise
@@ -487,7 +491,7 @@ window.renderChart = function (workouts) {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Total Sets',
+                label: I18N.t('total_sets_chart'),
                 data: setsData,
                 backgroundColor: 'rgba(0, 242, 96, 0.5)',
                 borderColor: '#00f260',
@@ -517,7 +521,7 @@ window.renderChart = function (workouts) {
 }
 
 window.deleteHistoryWorkout = async function (id) {
-    if (!confirm('Delete this workout record?')) return;
+    if (!confirm(I18N.t('delete_confirm_workout'))) return;
     try {
         const res = await fetchWithAuth(`/api/workouts/${id}`, { method: 'DELETE' });
         if (res.ok) updateDashboardUI();
@@ -551,7 +555,7 @@ async function fetchWithAuth(url, options = {}) {
 function setLoading(btn, isLoading) {
     if (isLoading) {
         btn.dataset.originalText = btn.textContent;
-        btn.textContent = 'Processing...';
+        btn.textContent = I18N.t('processing');
         btn.disabled = true;
     } else {
         btn.textContent = btn.dataset.originalText;
@@ -587,13 +591,13 @@ window.editExercise = async function (id, name, target, secondary) {
 }
 
 window.deleteExercise = async function (id) {
-    if (confirm('Are you sure you want to delete this exercise?')) {
+    if (confirm(I18N.t('delete_confirm_exercise'))) {
         try {
             const res = await fetchWithAuth(`/api/exercises/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok || res.status === 204) updateDashboardUI();
-            else alert('Failed to delete');
+            else alert(I18N.t('failed_delete_exercise'));
         } catch (e) { console.error(e); }
     }
 }
@@ -712,13 +716,13 @@ if (exerciseSearch) {
 
 // Routine CRUD
 window.deleteRoutine = async function (id) {
-    if (!confirm('Are you sure you want to delete this routine?')) return;
+    if (!confirm(I18N.t('delete_confirm_routine'))) return;
     try {
         const res = await fetchWithAuth(`/api/routines/${id}`, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             updateDashboardUI();
         } else {
-            alert('Failed to delete routine');
+            alert(I18N.t('failed_delete_routine'));
         }
     } catch (e) { console.error(e); }
 }
@@ -734,8 +738,8 @@ window.openEditRoutineModal = async function (id) {
 
             // Populate Modal
             document.getElementById('routineName').value = routine.name;
-            document.getElementById('createRoutineModalTitle').textContent = 'Edit Routine';
-            document.getElementById('createRoutineSubmitBtn').textContent = 'Update Routine';
+            document.getElementById('createRoutineModalTitle').textContent = I18N.t('edit_exercise').split(':')[0]; // Refactor later
+            document.getElementById('createRoutineSubmitBtn').textContent = I18N.t('update_exercise').split(' ')[0]; // Refactor later
 
             // Checks
             const exerciseIds = routine.exercises ? routine.exercises.map(e => String(e.id)) : [];

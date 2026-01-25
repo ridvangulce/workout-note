@@ -1,3 +1,4 @@
+/*
 // API Configuration - v1.0.1 (Cache Buster Update)
 const API_URL = '/api/auth';
 
@@ -641,3 +642,5 @@ window.openEditRoutineModal = async function (id) {
 }
 
 function setupNavLinks() { }
+
+*/
