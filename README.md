@@ -1,4 +1,4 @@
-# Workout API
+# WorkoutNote 🏋️‍♂️
 
 **[English](#english) | [Türkçe](#türkçe)**
 
@@ -8,29 +8,29 @@
 ## 🇬🇧 English
 
 ### Description
-**Workout API** is a RESTful API designed to manage workout routines, exercises, and sets. It provides a backend solution for fitness applications, enabling users to create workouts, log exercises, and track their progress.
+**WorkoutNote** is a comprehensive SaaS platform designed for dedicated athletes to track, analyze, and optimize their fitness journey. Moving beyond a simple API, it provides a feature-rich interface for personal workout logging, exercise management with anatomical visualization, and progress analytics.
 
-### Features
-*   **Authentication & Authorization:** Secure user registration and login using JWT (JSON Web Tokens). Global error handling and logging.
-*   **Workouts Management:** Create, read, update, and delete workout sessions.
-*   **Exercise Tracking:** Add exercises to workouts and manage their details.
-*   **Set Logging:** Log specific sets (reps, weight) for each exercise.
-*   **Health Check:** Endpoint to verify API status.
+### Key Features
+*   **Intuitive Workout Logging:** Effortlessly log your sets, reps, and weights with a human-centric interface.
+*   **Interactive Body Map:** Visualize muscle engagement and filter exercises using an interactive anatomical SVG map.
+*   **Progress Analytics:** Track your volume and sets over time with built-in charts and history.
+*   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content.
+*   **Smart Routines:** Create and manage personalized workout routines for efficient training sessions.
+*   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication.
 
 ### Technology Stack
-*   **Runtime:** [Node.js](https://nodejs.org/)
-*   **Framework:** [Express](https://expressjs.com/)
-*   **Database:** [PostgreSQL](https://www.postgresql.org/)
-*   **Database Driver:** [pg](https://node-postgres.com/)
-*   **Authentication:** `jsonwebtoken`, `bcrypt`, `cookie-parser`
-*   **Utilities:** `dotenv` for configuration, `nodemon` for development.
+*   **Frontend:** Vanilla JS, CSS3, Semantic HTML5
+*   **Backend:** Node.js & Express
+*   **Database:** PostgreSQL
+*   **Authentication:** JWT (JSON Web Tokens) with Cookie support
+*   **Visualization:** Chart.js, Interactive SVG Map
 
 ### Installation
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
-    cd workout-api
+    git clone https://github.com/ridvangulce/workout-note.git
+    cd workout-note
     ```
 
 2.  **Install dependencies:**
@@ -39,8 +39,7 @@
     ```
 
 3.  **Configuration:**
-    Create a `.env` file in the root directory and add the necessary environment variables (e.g., PORT, DATABASE_URL, JWT_SECRET).
-
+    Create a `.env` file in the root directory:
     ```env
     PORT=3000
     DB_HOST=localhost
@@ -55,42 +54,35 @@
     npm run dev
     ```
 
-### API Endpoints Overview
-*   **Auth:** `/auth` (Login, Register)
-*   **Workouts:** `/api/workouts`
-*   **Exercises:** `/api/exercises`
-*   **Sets:** `/api/sets`
-*   **Health:** `/health`
-
 ---
 
 <a name="türkçe"></a>
 ## 🇹🇷 Türkçe
 
 ### Proje Tanımı
-**Workout API**, antrenman programlarını, egzersizleri ve setleri yönetmek için tasarlanmış bir RESTful API'dir. Fitness uygulamaları için bir arka uç çözümü sunarak kullanıcıların antrenman oluşturmasına, egzersizleri kaydetmesine ve ilerlemelerini takip etmesine olanak tanır.
+**WorkoutNote**, tutkulu sporcuların fitness yolculuklarını takip etmeleri, analiz etmeleri ve optimize etmeleri için tasarlanmış kapsamlı bir SaaS platformudur. Basit bir API'nin ötesine geçerek; kişisel antrenman kaydı, anatomik görselleştirmeli egzersiz yönetimi ve gelişim analizi için zengin özelliklere sahip bir arayüz sunar.
 
-### Özellikler
-*   **Kimlik Doğrulama ve Yetkilendirme:** JWT (JSON Web Token) kullanarak güvenli kullanıcı kaydı ve girişi.
-*   **Antrenman Yönetimi:** Antrenman oturumlarını oluşturma, görüntüleme, güncelleme ve silme.
-*   **Egzersiz Takibi:** Antrenmanlara egzersiz ekleme ve detaylarını yönetme.
-*   **Set Kaydı:** Her egzersiz için özel setleri (tekrar, ağırlık) kaydetme.
-*   **Sağlık Kontrolü:** API durumunu kontrol etmek için endpoint.
+### Temel Özellikler
+*   **Sezgisel Antrenman Kaydı:** Setlerinizi, tekrarlarınızı ve ağırlıklarınızı insan odaklı bir arayüzle zahmetsizce kaydedin.
+*   **Etkileşimli Vücut Haritası:** Etkileşimli anatomik SVG haritası ile kas katılımını görselleştirin ve egzersizleri filtreleyin.
+*   **Gelişim Analizi:** Dahili grafikler ve geçmişle hacim ve set sayınızı zaman içinde takip edin.
+*   **Çoklu Dil Desteği:** Dinamik içerik dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
+*   **Akıllı Rutinler:** Verimli antrenman seansları için kişiselleştirilmiş rutinler oluşturun ve yönetin.
+*   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ile kişisel kullanıcı profilleri.
 
 ### Teknoloji Yığını
-*   **Çalışma Zamanı:** [Node.js](https://nodejs.org/)
-*   **Framework:** [Express](https://expressjs.com/)
-*   **Veritabanı:** [PostgreSQL](https://www.postgresql.org/)
-*   **Veritabanı Sürücüsü:** [pg](https://node-postgres.com/)
-*   **Kimlik Doğrulama:** `jsonwebtoken`, `bcrypt`, `cookie-parser`
-*   **Araçlar:** Yapılandırma için `dotenv`, geliştirme için `nodemon`.
+*   **Frontend:** Vanilla JS, CSS3, Semantik HTML5
+*   **Backend:** Node.js & Express
+*   **Database:** PostgreSQL
+*   **Kimlik Doğrulama:** JWT (JSON Web Tokens), Çerez desteği ile
+*   **Görselleştirme:** Chart.js, Etkileşimli SVG Haritası
 
 ### Kurulum
 
 1.  **Depoyu klonlayın:**
     ```bash
-    git clone <depo-url>
-    cd workout-api
+    git clone https://github.com/ridvangulce/workout-note.git
+    cd workout-note
     ```
 
 2.  **Bağımlılıkları yükleyin:**
@@ -99,8 +91,7 @@
     ```
 
 3.  **Yapılandırma:**
-    Kök dizinde bir `.env` dosyası oluşturun ve gerekli ortam değişkenlerini ekleyin (örn. PORT, DATABASE_URL, JWT_SECRET).
-
+    Kök dizinde bir `.env` dosyası oluşturun:
     ```env
     PORT=3000
     DB_HOST=localhost
@@ -114,10 +105,3 @@
     ```bash
     npm run dev
     ```
-
-### API Uç Noktaları (Endpoints)
-*   **Yetkilendirme:** `/auth` (Giriş, Kayıt)
-*   **Antrenmanlar:** `/api/workouts`
-*   **Egzersizler:** `/api/exercises`
-*   **Setler:** `/api/sets`
-*   **Sağlık:** `/health`

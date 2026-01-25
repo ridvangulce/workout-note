@@ -257,6 +257,8 @@ function updateAuthUI() {
                 <a href="/register.html" class="btn btn-primary" data-i18n="nav_get_started">${I18N.t('nav_get_started')}</a>
             `;
         }
+        // Force re-render switcher since we replace navLinks.innerHTML
+        if (typeof I18N !== 'undefined') I18N.renderLanguageSwitcher(true);
     }
 }
 
