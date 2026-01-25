@@ -11,4 +11,6 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }, // Supabase/Vercel için en stabil
 });
 
+console.log(`[DB Config] SSL configuration: rejectUnauthorized=${pool.options.ssl ? pool.options.ssl.rejectUnauthorized : 'undefined'}`);
+
 module.exports = pool;
