@@ -102,23 +102,27 @@ const updateOrder = async (userId, exerciseOrder) => {
     }
 }
 
-const createBatch = async (userId, exerciseNames) => {
-    if (!exerciseNames || exerciseNames.length === 0) return;
+const createBatch = async (userId, exercises) => {
+    if (!exercises || exercises.length === 0) return;
 
-    // Construct param placeholders like ($1, $2, $3), ($1, $4, $5)...
-    // We need (name, user_id, order_index)
-    // order_index will be i+1
+    // Construct param placeholders like ($1, $2, $3, $4, $5)...
+    // We need (name, user_id, order_index, target_muscle_group, secondary_muscles)
 
     const values = [];
-    const placeholders = exerciseNames.map((name, index) => {
-        const offset = index * 3;
-        values.push(name, userId, index + 1); // pushing 3 items
-        return `($${offset + 1}, $${offset + 2}, $${offset + 3})`;
+    const placeholders = exercises.map((ex, index) => {
+        const offset = index * 5;
+        // Handle both string array (legacy support) and object array
+        const name = typeof ex === 'string' ? ex : ex.name;
+        const target = typeof ex === 'string' ? null : ex.target;
+        const secondary = typeof ex === 'string' ? null : ex.secondary;
+
+        values.push(name, userId, index + 1, target, secondary);
+        return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5})`;
     }).join(', ');
 
     const result = await pool.query(
         `
-        INSERT INTO exercises(name, user_id, order_index)
+        INSERT INTO exercises(name, user_id, order_index, target_muscle_group, secondary_muscles)
         VALUES ${placeholders}
         RETURNING *
         `, values
