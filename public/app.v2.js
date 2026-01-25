@@ -1,6 +1,13 @@
 // API Configuration - v1.0.1 (Cache Buster Update)
 const API_URL = '/api/auth';
 
+const MUSCLE_GROUPS = [
+    "Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms",
+    "Quads", "Hamstrings", "Glutes", "Calves", "Abs", "Traps", "Lats"
+];
+
+let currentEditingExerciseId = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial UI Checks
     updateAuthUI();
@@ -53,21 +60,60 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const name = document.getElementById('exerciseName').value;
             const target_muscle_group = document.getElementById('targetMuscle').value;
-            const secondary_muscles = document.getElementById('secondaryMuscles').value;
+            const secondary_muscles = $('#secondaryMuscleSelect').val() ? $('#secondaryMuscleSelect').val().join(', ') : '';
+
             try {
-                const res = await fetchWithAuth('/api/exercises', {
-                    method: 'POST',
+                let url = '/api/exercises';
+                let method = 'POST';
+
+                if (currentEditingExerciseId) {
+                    url = `/api/exercises/${currentEditingExerciseId}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetchWithAuth(url, {
+                    method: method,
                     body: { name, target_muscle_group, secondary_muscles }
                 });
+
                 if (res.ok) {
                     window.closeModal('addExerciseModal');
+                    currentEditingExerciseId = null;
                     updateDashboardUI(); // Refresh list
                     addExerciseForm.reset();
                 } else {
-                    alert('Failed to add exercise');
+                    alert('Failed to save exercise');
                 }
             } catch (err) { console.error(err); }
         });
+    }
+
+    // Populate Muscle Group UI
+    const targetMuscleSelect = document.getElementById('targetMuscle');
+    const secondaryMuscleSelect = document.getElementById('secondaryMuscleSelect');
+    const exerciseTabFilter = document.getElementById('exerciseTabFilter');
+    const routineExerciseFilter = document.getElementById('routineExerciseFilter');
+
+    const muscleOptions = MUSCLE_GROUPS.map(m => `<option value="${m}">${m}</option>`).join('');
+
+    if (targetMuscleSelect) {
+        targetMuscleSelect.innerHTML = '<option value="">Select Target Muscle...</option>' + muscleOptions;
+    }
+    if (secondaryMuscleSelect) {
+        secondaryMuscleSelect.innerHTML = muscleOptions;
+    }
+    if (exerciseTabFilter) {
+        exerciseTabFilter.innerHTML = muscleOptions;
+    }
+    if (routineExerciseFilter) {
+        routineExerciseFilter.innerHTML = muscleOptions;
+    }
+
+    // Initialize Select2
+    if (typeof $ !== 'undefined' && $.fn.select2) {
+        $('#exerciseTabFilter').select2({ placeholder: "Filter by Muscle Groups...", allowClear: true }).on('change', filterExerciseTab);
+        $('#routineExerciseFilter').select2({ placeholder: "Filter by Muscles...", allowClear: true }).on('change', filterRoutineExercises);
+        $('#secondaryMuscleSelect').select2({ placeholder: "Select Secondary Muscles...", allowClear: true });
     }
 
     const createRoutineForm = document.getElementById('createRoutineForm');
@@ -240,7 +286,7 @@ async function updateDashboardUI() {
             }
             if (exercises.length === 0) selectContainer.innerHTML = '<div class="empty-state">No exercises available</div>';
             else selectContainer.innerHTML = exercises.map(ex => `
-                    <label class="exercise-checkbox-item">
+                    <label class="exercise-checkbox-item" data-name="${ex.name.toLowerCase()}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}">
                         <input type="checkbox" value="${ex.id}" name="exercises">
                         ${ex.name}
                     </label>
@@ -251,7 +297,7 @@ async function updateDashboardUI() {
                 if (exercises.length === 0) list.innerHTML = '<div class="empty-state">No exercises found. Add your first one!</div>';
                 else {
                     list.innerHTML = exercises.map(ex => `
-                            <div class="exercise-item" draggable="true" data-id="${ex.id}">
+                            <div class="exercise-item" draggable="true" data-id="${ex.id}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}">
                                 <div class="exercise-content">
                                     <span class="drag-handle">☰</span>
                                     <div style="display:flex; flex-direction:column;">
@@ -387,6 +433,16 @@ window.openModal = function (modalId) {
             document.getElementById('createRoutineSubmitBtn').textContent = 'Save Routine';
             currentEditingRoutineId = null;
         }
+        // Reset Logic for Add/Edit Exercise
+        if (modalId === 'addExerciseModal' && !currentEditingExerciseId) {
+            document.getElementById('addExerciseForm').reset();
+            document.getElementById('addExerciseModalTitle').textContent = 'Add New Exercise';
+            document.getElementById('addExerciseSubmitBtn').textContent = 'Add Exercise';
+            currentEditingExerciseId = null;
+            if ($.fn.select2) {
+                $('#secondaryMuscleSelect').val(null).trigger('change');
+            }
+        }
         modal.style.display = 'block';
     }
 }
@@ -396,6 +452,9 @@ window.closeModal = function (modalId) {
     if (modal) {
         if (modalId === 'createRoutineModal') {
             currentEditingRoutineId = null;
+        }
+        if (modalId === 'addExerciseModal') {
+            currentEditingExerciseId = null;
         }
         modal.style.display = 'none';
     }
@@ -508,28 +567,23 @@ function showMessage(type, text) {
     }
 }
 
-window.editExercise = async function (id, oldName, oldTarget, oldSecondary) {
-    const newName = prompt('Enter new name:', oldName);
-    if (newName === null) return;
-    const newTarget = prompt('Enter main target muscle:', oldTarget);
-    if (newTarget === null) return;
-    const newSecondary = prompt('Enter secondary muscles:', oldSecondary);
-    if (newSecondary === null) return;
+window.editExercise = async function (id, name, target, secondary) {
+    currentEditingExerciseId = id;
 
-    if (newName !== oldName || newTarget !== oldTarget || newSecondary !== oldSecondary) {
-        try {
-            const res = await fetchWithAuth(`/api/exercises/${id}`, {
-                method: 'PUT',
-                body: {
-                    name: newName,
-                    target_muscle_group: newTarget,
-                    secondary_muscles: newSecondary
-                }
-            });
-            if (res.ok) updateDashboardUI();
-            else alert('Failed to update');
-        } catch (e) { console.error(e); }
+    // Populate Modal
+    document.getElementById('exerciseName').value = name;
+    document.getElementById('targetMuscle').value = target || "";
+
+    document.getElementById('addExerciseModalTitle').textContent = 'Edit Exercise';
+    document.getElementById('addExerciseSubmitBtn').textContent = 'Update Exercise';
+
+    // Set secondary muscles using Select2
+    const secondaryArray = secondary ? secondary.split(',').map(s => s.trim()) : [];
+    if ($.fn.select2) {
+        $('#secondaryMuscleSelect').val(secondaryArray).trigger('change');
     }
+
+    window.openModal('addExerciseModal');
 }
 
 window.deleteExercise = async function (id) {
@@ -601,20 +655,59 @@ async function saveExerciseOrder() {
 }
 
 // Search/Filter Logic
-const exerciseSearch = document.getElementById('exerciseSearch');
-if (exerciseSearch) {
-    exerciseSearch.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.exercise-checkbox-item');
-        items.forEach(item => {
-            const text = item.textContent.trim().toLowerCase();
-            if (text.includes(term)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
+function filterExerciseTab() {
+    const selectedMuscles = $('#exerciseTabFilter').val() || [];
+    const items = document.querySelectorAll('#exercisesList .exercise-item');
+    items.forEach(item => {
+        if (selectedMuscles.length === 0) {
+            item.style.display = 'flex';
+            return;
+        }
+        const target = (item.dataset.target || '').toLowerCase();
+        const secondary = (item.dataset.secondary || '').split(',').map(s => s.trim().toLowerCase());
+
+        const matchesMuscle = selectedMuscles.every(m => {
+            const lowerM = m.toLowerCase();
+            return target === lowerM || secondary.includes(lowerM);
         });
+
+        item.style.display = matchesMuscle ? 'flex' : 'none';
     });
+}
+
+const exerciseSearch = document.getElementById('exerciseSearch');
+const routineExerciseFilter = document.getElementById('routineExerciseFilter');
+
+function filterRoutineExercises() {
+    const term = exerciseSearch.value.toLowerCase();
+    const selectedMuscles = $('#routineExerciseFilter').val() || [];
+    const items = document.querySelectorAll('#exerciseSelectContainer .exercise-checkbox-item');
+
+    items.forEach(item => {
+        const name = item.dataset.name || '';
+        const target = (item.dataset.target || '').toLowerCase();
+        const secondary = (item.dataset.secondary || '').split(',').map(s => s.trim().toLowerCase());
+
+        const matchesName = name.includes(term);
+        let matchesMuscle = true;
+
+        if (selectedMuscles.length > 0) {
+            matchesMuscle = selectedMuscles.every(m => {
+                const lowerM = m.toLowerCase();
+                return target === lowerM || secondary.includes(lowerM);
+            });
+        }
+
+        if (matchesName && matchesMuscle) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+if (exerciseSearch) {
+    exerciseSearch.addEventListener('input', filterRoutineExercises);
 }
 
 // Routine CRUD
