@@ -100,4 +100,23 @@ const logout = async (refreshToken) => {
 }
 
 
-module.exports = { register, login, refresh, logout };
+const updateProfile = async (userId, name) => {
+    if (!name) throw new AppError("Name is required", 400);
+    const user = await authRepo.updateProfile(userId, name);
+    return { id: user.id, email: user.email, name: user.full_name };
+}
+
+const updatePassword = async (userId, currentPassword, newPassword) => {
+    if (!currentPassword || !newPassword) throw new AppError("All fields required", 400);
+
+    const user = await authRepo.getUserById(userId);
+    if (!user) throw new AppError("User not found", 404);
+
+    const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isValid) throw new AppError("Incorrect current password", 401);
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await authRepo.updatePassword(userId, hashedPassword);
+}
+
+module.exports = { register, login, refresh, logout, updateProfile, updatePassword };

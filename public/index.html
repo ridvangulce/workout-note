@@ -10,6 +10,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script>
+        // Redirect to dashboard if logged in
+        if (localStorage.getItem('workout_token')) {
+            window.location.href = '/dashboard';
+        }
+    </script>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,8 +29,8 @@
         <div class="nav-links">
             <a href="#features" data-i18n="nav_features">Features</a>
             <a href="#docs" data-i18n="nav_docs">Docs</a>
-            <a href="/login.html" id="loginBtn" class="btn btn-secondary" data-i18n="nav_login">Login</a>
-            <a href="/register.html" id="registerBtn" class="btn btn-primary" data-i18n="nav_get_started">Get
+            <a href="/login" id="loginBtn" class="btn btn-secondary" data-i18n="nav_login">Login</a>
+            <a href="/register" id="registerBtn" class="btn btn-primary" data-i18n="nav_get_started">Get
                 Started</a>
         </div>
     </nav>
@@ -34,9 +42,8 @@
                 track your personal
                 progress. Secure, fast, and easy to use.</p>
             <div class="cta-group">
-                <a href="/register.html" class="btn btn-large btn-primary" data-i18n="start_building">Start Building
-                    Now</a>
-                <a href="#docs" class="btn btn-large btn-outline" data-i18n="view_docs">View Documentation</a>
+                <a href="/register" class="btn btn-large btn-primary" data-i18n="start_building">Join Now</a>
+                <a href="#docs" class="btn btn-large btn-outline" data-i18n="view_docs">See Documentation</a>
             </div>
 
             <div class="stats-container">
