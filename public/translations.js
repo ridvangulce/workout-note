@@ -141,7 +141,8 @@ const TRANSLATIONS = {
         "lbl_current_password": "Current Password",
         "lbl_new_password": "New Password",
         "profile_updated_success": "Profile updated successfully",
-        "password_updated_success": "Password updated successfully"
+        "password_updated_success": "Password updated successfully",
+        "start_workout": "Start Workout"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -285,6 +286,7 @@ const TRANSLATIONS = {
         "lbl_current_password": "Mevcut Şifre",
         "lbl_new_password": "Yeni Şifre",
         "profile_updated_success": "Profil başarıyla güncellendi",
-        "password_updated_success": "Şifre başarıyla güncellendi"
+        "password_updated_success": "Şifre başarıyla güncellendi",
+        "start_workout": "Antrenman Başlat"
     }
 };

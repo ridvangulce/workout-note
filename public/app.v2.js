@@ -409,6 +409,9 @@ async function updateDashboardUI() {
                     setupDragAndDrop();
                 }
             }
+            if (window.I18N && window.I18N.updatePageTranslations) {
+                window.I18N.updatePageTranslations();
+            }
         }
     } catch (e) { console.error(e); }
 
@@ -435,9 +438,12 @@ async function updateDashboardUI() {
                         ? r.exercises.length + ' Exercises: ' + r.exercises.map(e => e.name).slice(0, 3).join(', ')
                         : 'No exercises'}
                         </div>
-                        <button class="btn btn-outline btn-sm" onclick="startWorkout('${r.id}')" style="width:100%; margin-top:0.5rem;">Start Workout</button>
+                        <button data-i18n="start_workout" class="btn btn-outline btn-sm" onclick="startWorkout('${r.id}')" style="width:100%; margin-top:0.5rem;">Start Workout</button>
                     </div>
                 `).join('');
+                if (window.I18N && window.I18N.updatePageTranslations) {
+                    window.I18N.updatePageTranslations();
+                }
             }
         }
     } catch (e) { console.error(e); }
@@ -501,6 +507,10 @@ async function updateDashboardUI() {
 
             // Render Chart
             if (window.renderChart) window.renderChart(workouts);
+
+            if (window.I18N && window.I18N.updatePageTranslations) {
+                window.I18N.updatePageTranslations();
+            }
         }
     } catch (e) { console.error(e); }
 }
