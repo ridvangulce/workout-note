@@ -151,7 +151,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setupNavLinks();
+
+    // 5. Settings Forms
+    const settingsProfileForm = document.getElementById('settingsProfileForm');
+    if (settingsProfileForm) {
+        settingsProfileForm.addEventListener('submit', handleUpdateProfile);
+    }
+    const settingsPasswordForm = document.getElementById('settingsPasswordForm');
+    if (settingsPasswordForm) {
+        settingsPasswordForm.addEventListener('submit', handleUpdatePassword);
+    }
 });
+
+// --- Settings Handlers ---
+
+async function handleUpdateProfile(e) {
+    e.preventDefault();
+    const nameInput = document.getElementById('settingsName');
+    const btn = e.target.querySelector('button');
+    const newName = nameInput.value;
+
+    setLoading(btn, true);
+    try {
+        const res = await fetchWithAuth('/api/auth/profile', {
+            method: 'PUT',
+            body: { name: newName }
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            // Update local storage
+            const user = JSON.parse(localStorage.getItem('workout_user') || '{}');
+            user.name = data.user.name;
+            localStorage.setItem('workout_user', JSON.stringify(user));
+
+            // Update UI
+            updateAuthUI();
+            updateDashboardUI();
+            showMessage('success', I18N.t('profile_updated_success'));
+        } else {
+            showMessage('error', data.message || I18N.t('error_generic'));
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('error', I18N.t('error_generic'));
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+async function handleUpdatePassword(e) {
+    e.preventDefault();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const btn = e.target.querySelector('button');
+
+    setLoading(btn, true);
+    try {
+        const res = await fetchWithAuth('/api/auth/password', {
+            method: 'PUT',
+            body: { currentPassword, newPassword }
+        });
+
+        if (res.ok) {
+            showMessage('success', I18N.t('password_updated_success'));
+            e.target.reset();
+        } else {
+            const data = await res.json();
+            showMessage('error', data.message || I18N.t('error_generic'));
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('error', I18N.t('error_generic'));
+    } finally {
+        setLoading(btn, false);
+    }
+}
 
 // --- Auth Handling ---
 
@@ -180,7 +255,7 @@ async function handleLogin(e) {
                 }
             }
             showMessage('success', I18N.t('login_success'));
-            setTimeout(() => { window.location.href = '/dashboard.html'; }, 1000);
+            setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
         } else {
             showMessage('error', data.error === 'Invalid credentials' ? I18N.t('invalid_credentials') : (data.error || data.message || I18N.t('error_generic')));
         }
@@ -211,7 +286,7 @@ async function handleRegister(e) {
 
         if (response.ok) {
             showMessage('success', I18N.t('register_success'));
-            setTimeout(() => { window.location.href = '/login.html'; }, 1500);
+            setTimeout(() => { window.location.href = '/login'; }, 1500);
         } else {
             showMessage('error', data.error || data.message || I18N.t('error_generic'));
         }
@@ -227,7 +302,7 @@ function handleLogout(e) {
     if (e) e.preventDefault();
     localStorage.removeItem('workout_token');
     localStorage.removeItem('workout_user');
-    window.location.href = '/login.html';
+    window.location.href = '/login';
 }
 
 // --- UI Helpers ---
@@ -241,7 +316,7 @@ function updateAuthUI() {
         if (token) {
             const user = JSON.parse(localStorage.getItem('workout_user') || '{}');
             navLinks.innerHTML = `
-                <a href="/dashboard.html" data-i18n="nav_overview">${I18N.t('nav_overview')}</a>
+                <a href="/dashboard" data-i18n="nav_overview">${I18N.t('nav_overview')}</a>
                 <span class="user-greeting" style="color:var(--text-muted); font-size: 0.9rem;">${I18N.t('welcome_back').split(',')[0]} ${user.name || 'User'}</span>
                 <a href="#" id="logoutBtn" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;" data-i18n="nav_logout">${I18N.t('nav_logout')}</a>
             `;
@@ -253,8 +328,8 @@ function updateAuthUI() {
             navLinks.innerHTML = `
                 <a href="/#features" data-i18n="nav_features">${I18N.t('nav_features')}</a>
                 <a href="/#docs" data-i18n="nav_docs">${I18N.t('nav_docs')}</a>
-                <a href="/login.html" class="btn btn-secondary" data-i18n="nav_login">${I18N.t('nav_login')}</a>
-                <a href="/register.html" class="btn btn-primary" data-i18n="nav_get_started">${I18N.t('nav_get_started')}</a>
+                <a href="/login" class="btn btn-secondary" data-i18n="nav_login">${I18N.t('nav_login')}</a>
+                <a href="/register" class="btn btn-primary" data-i18n="nav_get_started">${I18N.t('nav_get_started')}</a>
             `;
         }
         // Force re-render switcher since we replace navLinks.innerHTML
@@ -267,7 +342,6 @@ async function updateDashboardUI() {
     const user = JSON.parse(localStorage.getItem('workout_user') || '{}');
     const userNameEl = document.getElementById('userName');
     const userInitialsEl = document.getElementById('userInitials');
-
     if (userNameEl) userNameEl.textContent = user.name || 'User';
     if (userInitialsEl) userInitialsEl.textContent = (user.name || 'U').charAt(0).toUpperCase();
 
@@ -275,6 +349,20 @@ async function updateDashboardUI() {
     if (nameDisplay) {
         nameDisplay.textContent = user.name || (user.email ? user.email.split('@')[0] : 'User');
     }
+
+    // Populate Settings Profile
+    const settingsNameEl = document.getElementById('settingsName');
+    const settingsEmailEl = document.getElementById('settingsEmail');
+    if (settingsNameEl && settingsEmailEl) {
+        settingsNameEl.value = user.name || '';
+        settingsEmailEl.value = user.email || '';
+    }
+
+    // Initialize Settings Fields if on settings view
+    const settingFullName = document.getElementById('settingFullName');
+    const settingWeightUnit = document.getElementById('settingWeightUnit');
+    if (settingFullName) settingFullName.value = user.name || '';
+    if (settingWeightUnit) settingWeightUnit.value = user.weightUnit || 'kg';
 
     const token = localStorage.getItem('workout_token');
     if (!token) return;
@@ -467,7 +555,7 @@ window.closeModal = function (modalId) {
 }
 
 window.startWorkout = function (routineId) {
-    window.location.href = `/workout-log.html?routine=${routineId}`;
+    window.location.href = `/workout-log?routine=${routineId}`;
 }
 
 let workoutChartInstance = null;
@@ -531,7 +619,7 @@ window.deleteHistoryWorkout = async function (id) {
 }
 
 window.editHistoryWorkout = function (id) {
-    window.location.href = `/workout-log.html?workoutId=${id}`;
+    window.location.href = `/workout-log?workoutId=${id}`;
 }
 
 // --- Utils ---
@@ -549,7 +637,7 @@ async function fetchWithAuth(url, options = {}) {
     const response = await fetch(url, { ...options, headers });
     if (response.status === 401) {
         localStorage.removeItem('workout_token');
-        window.location.href = '/login.html';
+        window.location.href = '/login';
     }
     return response;
 }
@@ -753,5 +841,84 @@ window.openEditRoutineModal = async function (id) {
         }
     } catch (e) { console.error(e); }
 }
+
+// --- Settings ---
+
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    const name = document.getElementById('settingFullName').value;
+    const weightUnit = document.getElementById('settingWeightUnit').value;
+    const btn = e.target.querySelector('button');
+
+    setLoading(btn, true);
+    try {
+        const res = await fetchWithAuth('/api/auth/profile', {
+            method: 'PUT',
+            body: { name, weightUnit }
+        });
+        if (res.ok) {
+            const updatedUser = await res.json();
+            const localUser = JSON.parse(localStorage.getItem('workout_user') || '{}');
+            localStorage.setItem('workout_user', JSON.stringify({ ...localUser, name: updatedUser.name, weightUnit: updatedUser.weightUnit }));
+            alert(I18N.t('profile_updated'));
+            updateDashboardUI(); // Refresh names in UI
+        } else {
+            alert(I18N.t('error_update_profile'));
+        }
+    } catch (err) { console.error(err); }
+    finally { setLoading(btn, false); }
+}
+
+async function handlePasswordChange(e) {
+    e.preventDefault();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const btn = e.target.querySelector('button');
+
+    if (newPassword !== confirmPassword) {
+        alert(I18N.t('passwords_dont_match'));
+        return;
+    }
+
+    setLoading(btn, true);
+    try {
+        const res = await fetchWithAuth('/api/auth/change-password', {
+            method: 'PUT',
+            body: { currentPassword, newPassword }
+        });
+        if (res.ok) {
+            alert(I18N.t('password_changed'));
+            e.target.reset();
+        } else {
+            const data = await res.json();
+            alert(data.error || I18N.t('error_change_password'));
+        }
+    } catch (err) { console.error(err); }
+    finally { setLoading(btn, false); }
+}
+
+function setupSettingsListeners() {
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) profileForm.addEventListener('submit', handleProfileUpdate);
+
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) passwordForm.addEventListener('submit', handlePasswordChange);
+
+    const savePreferencesBtn = document.getElementById('savePreferencesBtn');
+    if (savePreferencesBtn) {
+        savePreferencesBtn.addEventListener('click', () => {
+            const weightUnit = document.getElementById('settingWeightUnit').value;
+            handleProfileUpdate({ preventDefault: () => { }, target: { querySelector: () => savePreferencesBtn } });
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // translations.js and i18n.js are loaded before
+    updateAuthUI();
+    updateDashboardUI();
+    setupSettingsListeners();
+});
 
 function setupNavLinks() { }

@@ -122,8 +122,9 @@
     </style>
     <script>
         // Inline auth check to prevent flash of content
+        // Inline auth check to prevent flash of content
         if (!localStorage.getItem('workout_token')) {
-            window.location.href = '/login.html';
+            window.location.href = '/login';
         }
     </script>
 </head>
@@ -150,9 +151,10 @@
 
             <ul class="sidebar-menu">
                 <li class="active"><a href="#" data-view="overview" data-i18n="nav_overview">Overview</a></li>
-                <li><a href="#" data-view="workouts" data-i18n="nav_workouts">My Workouts</a></li>
+                <li><a href="#" data-view="routines" data-i18n="nav_workouts">My Workouts</a></li>
                 <li><a href="#" data-view="exercises" data-i18n="nav_exercises">Exercises</a></li>
                 <li><a href="#" data-view="history" data-i18n="nav_history">History</a></li>
+                <li><a href="#" data-view="settings" data-i18n="nav_settings">Settings</a></li>
             </ul>
         </aside>
 
@@ -167,7 +169,7 @@
                         <span data-i18n="welcome_back">Welcome Back,</span> <span id="userNameDisplay"
                             style="color:var(--primary-color); font-weight:600;">User</span>!
                     </div>
-                    <button class="btn btn-primary" onclick="switchView('workouts')" data-i18n="new_workout">+ New
+                    <button class="btn btn-primary" onclick="switchView('routines')" data-i18n="new_workout">+ New
                         Workout</button>
                 </header>
 
@@ -190,7 +192,7 @@
             </div>
 
             <!-- Workouts View -->
-            <div id="workouts-view" class="view-section" style="display: none;">
+            <div id="routines-view" class="view-section" style="display: none;">
                 <header class="dashboard-header">
                     <h2 data-i18n="nav_workouts">My Workouts</h2>
                     <button class="btn btn-primary" onclick="openModal('createRoutineModal')"
@@ -270,6 +272,50 @@
                 <h3 style="margin-bottom: 1rem;" data-i18n="past_workouts">Past Workouts</h3>
                 <div id="historyList" class="routines-grid">
                     <div class="empty-state">Loading history...</div>
+                </div>
+            </div>
+
+            <!-- Settings View -->
+            <div id="settings-view" class="view-section" style="display: none;">
+                <header class="dashboard-header">
+                    <h2 data-i18n="nav_settings">Settings</h2>
+                </header>
+
+                <div class="settings-grid">
+                    <!-- Profile Card -->
+                    <div class="feature-card settings-card">
+                        <h3 data-i18n="settings_profile">Profile</h3>
+                        <form id="settingsProfileForm">
+                            <div class="form-group">
+                                <label data-i18n="name_label">Full Name</label>
+                                <input type="text" id="settingsName" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="email_label">Email Address</label>
+                                <input type="email" id="settingsEmail" disabled
+                                    style="opacity: 0.7; cursor: not-allowed;">
+                            </div>
+                            <button type="submit" class="btn btn-primary" data-i18n="btn_save_changes">Save
+                                Changes</button>
+                        </form>
+                    </div>
+
+                    <!-- Security Card -->
+                    <div class="feature-card settings-card">
+                        <h3 data-i18n="settings_security">Security</h3>
+                        <form id="settingsPasswordForm">
+                            <div class="form-group">
+                                <label data-i18n="lbl_current_password">Current Password</label>
+                                <input type="password" id="currentPassword" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="lbl_new_password">New Password</label>
+                                <input type="password" id="newPassword" required>
+                            </div>
+                            <button type="submit" class="btn btn-outline" data-i18n="btn_change_password">Change
+                                Password</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </main>

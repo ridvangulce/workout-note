@@ -16,6 +16,7 @@ const TRANSLATIONS = {
         "nav_workouts": "My Workouts",
         "nav_exercises": "Exercises",
         "nav_history": "History",
+        "nav_settings": "Settings",
         "nav_cancel_back": "Cancel / Back",
 
         // Hero Section
@@ -130,7 +131,17 @@ const TRANSLATIONS = {
         "sets_unit": "Sets",
         "recent_activity_title": "Recent Activity",
         "total_sets_chart": "Total Sets",
-        "welcome_back": "Welcome Back,"
+        "welcome_back": "Welcome Back,",
+
+        // Settings
+        "settings_profile": "Profile",
+        "settings_security": "Security",
+        "btn_save_changes": "Save Changes",
+        "btn_change_password": "Change Password",
+        "lbl_current_password": "Current Password",
+        "lbl_new_password": "New Password",
+        "profile_updated_success": "Profile updated successfully",
+        "password_updated_success": "Password updated successfully"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -149,6 +160,7 @@ const TRANSLATIONS = {
         "nav_workouts": "Antrenmanlarım",
         "nav_exercises": "Egzersizler",
         "nav_history": "Geçmiş",
+        "nav_settings": "Ayarlar",
         "nav_cancel_back": "Vazgeç / Geri",
 
         // Hero Section
@@ -263,6 +275,16 @@ const TRANSLATIONS = {
         "sets_unit": "Set",
         "recent_activity_title": "Son Aktiviteler",
         "total_sets_chart": "Toplam Set",
-        "welcome_back": "Tekrar Hoş Geldin,"
+        "welcome_back": "Tekrar Hoş Geldin,",
+
+        // Settings
+        "settings_profile": "Profil",
+        "settings_security": "Güvenlik",
+        "btn_save_changes": "Değişiklikleri Kaydet",
+        "btn_change_password": "Şifreyi Değiştir",
+        "lbl_current_password": "Mevcut Şifre",
+        "lbl_new_password": "Yeni Şifre",
+        "profile_updated_success": "Profil başarıyla güncellendi",
+        "password_updated_success": "Şifre başarıyla güncellendi"
     }
 };

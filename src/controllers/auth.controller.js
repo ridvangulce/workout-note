@@ -63,4 +63,26 @@ const logout = async (req, res, next) => {
     }
 }
 
-module.exports = { register, login, refresh, logout }
+const updateProfile = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { name } = req.body;
+        const updatedUser = await authService.updateProfile(userId, name);
+        res.json({ message: "Profile updated", user: updatedUser });
+    } catch (err) {
+        next(err);
+    }
+}
+
+const updatePassword = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { currentPassword, newPassword } = req.body;
+        await authService.updatePassword(userId, currentPassword, newPassword);
+        res.json({ message: "Password updated successfully" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { register, login, refresh, logout, updateProfile, updatePassword }

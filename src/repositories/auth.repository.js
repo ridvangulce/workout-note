@@ -66,4 +66,39 @@ const deleteRefreshToken = async (token) => {
         [token]
     );
 };
-module.exports = { register, checkUser, getUserByEmail, saveRefreshToken, findRefreshToken, deleteRefreshToken };
+
+const updateProfile = async (userId, name) => {
+    const result = await pool.query(
+        `
+        UPDATE users
+        SET full_name = $2
+        WHERE id = $1
+        RETURNING id, email, full_name
+        `, [userId, name]
+    );
+    return result.rows[0];
+};
+
+const updatePassword = async (userId, hashedPassword) => {
+    await pool.query(
+        `
+        UPDATE users
+        SET password_hash = $2
+        WHERE id = $1
+        `, [userId, hashedPassword]
+    );
+};
+
+const getUserById = async (userId) => {
+    const result = await pool.query(
+        `
+        SELECT id, email, password_hash, full_name
+        FROM users
+        WHERE id = $1
+        LIMIT 1
+        `, [userId]
+    );
+    return result.rows[0];
+};
+
+module.exports = { register, checkUser, getUserByEmail, saveRefreshToken, findRefreshToken, deleteRefreshToken, updateProfile, updatePassword, getUserById };
