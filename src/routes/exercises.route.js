@@ -4,7 +4,10 @@ const router = express.Router();
 const exerciseController = require("../controllers/exercise.controller");
 
 
-router.post("/exercises", authMiddleware, exerciseController.createExercise);
-router.get("/exercises", authMiddleware, exerciseController.getExercises)
+router.post("/api/exercises", authMiddleware, exerciseController.createExercise);
+router.get("/api/exercises", authMiddleware, exerciseController.getExercises);
+router.put("/api/exercises/:id", authMiddleware, exerciseController.updateExercise);
+router.delete("/api/exercises/:id", authMiddleware, exerciseController.deleteExercise);
+router.post("/api/exercises/reorder", authMiddleware, exerciseController.reorderExercises);
 
 module.exports = router;

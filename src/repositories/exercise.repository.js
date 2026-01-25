@@ -1,26 +1,31 @@
 const pool = require("../config/db");
 
-const create = async (userId, name) => {
+const create = async (userId, name, targetMuscleGroup = null, secondaryMuscles = null) => {
+    // Get max order_index to append
+    const maxOrderRes = await pool.query('SELECT MAX(order_index) as max_order FROM exercises WHERE user_id = $1', [userId]);
+    const nextOrder = (maxOrderRes.rows[0].max_order || 0) + 1;
+
     const result = await pool.query(
         `
-        INSERT INTO exercises(name, user_id)
-        VALUES($1, $2)
+        INSERT INTO exercises(name, user_id, order_index, target_muscle_group, secondary_muscles)
+        VALUES($1, $2, $3, $4, $5)
         RETURNING *
-        `, [name, userId]
+        `, [name, userId, nextOrder, targetMuscleGroup, secondaryMuscles]
     );
     return result.rows[0];
 }
+
 const getExercisesById = async (userId) => {
     const result = await pool.query(
         `
-        SELECT name
+        SELECT id, name, order_index, target_muscle_group, secondary_muscles
         FROM exercises
         WHERE user_id = $1
+        ORDER BY order_index ASC, id ASC
         `, [userId]
     );
     return result.rows;
 }
-
 
 const findByWorkoutId = async (workoutId) => {
     const result = await pool.query(
@@ -42,9 +47,83 @@ const existByName = async (userId, name) => {
         FROM exercises
         WHERE name = $1 AND user_id = $2
         LIMIT 1
-        `,[name, userId]
+        `, [name, userId]
     )
     return result.rowCount > 0;
 }
 
-module.exports = { create, getExercisesById, findByWorkoutId, existByName};
+const update = async (userId, exerciseId, { name, target_muscle_group, secondary_muscles }) => {
+    const result = await pool.query(
+        `
+        UPDATE exercises
+        SET name = COALESCE($1, name),
+            target_muscle_group = COALESCE($2, target_muscle_group),
+            secondary_muscles = COALESCE($3, secondary_muscles)
+        WHERE id = $4 AND user_id = $5
+        RETURNING *
+        `, [name, target_muscle_group, secondary_muscles, exerciseId, userId]
+    );
+    return result.rows[0];
+}
+
+const remove = async (userId, exerciseId) => {
+    // Delete sets first? Or cascade? Assuming foreign keys have cascade on delete or we handle it gracefully.
+    // Given previous migration failures with FKs, let's assume we might need to be careful.
+    // But usually DELETE on exercise will fail if sets exist unless cascade is on.
+    // For now simple delete.
+    const result = await pool.query(
+        `
+        DELETE FROM exercises
+        WHERE id = $1 AND user_id = $2
+        RETURNING id
+        `, [exerciseId, userId]
+    );
+    return result.rowCount > 0;
+}
+
+const updateOrder = async (userId, exerciseOrder) => {
+    // exerciseOrder is array of { id, order }
+    // Batch update? Or loop. Loop is simpler for now.
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        for (const item of exerciseOrder) {
+            await client.query(
+                'UPDATE exercises SET order_index = $1 WHERE id = $2 AND user_id = $3',
+                [item.order, item.id, userId]
+            );
+        }
+        await client.query('COMMIT');
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+const createBatch = async (userId, exerciseNames) => {
+    if (!exerciseNames || exerciseNames.length === 0) return;
+
+    // Construct param placeholders like ($1, $2, $3), ($1, $4, $5)...
+    // We need (name, user_id, order_index)
+    // order_index will be i+1
+
+    const values = [];
+    const placeholders = exerciseNames.map((name, index) => {
+        const offset = index * 3;
+        values.push(name, userId, index + 1); // pushing 3 items
+        return `($${offset + 1}, $${offset + 2}, $${offset + 3})`;
+    }).join(', ');
+
+    const result = await pool.query(
+        `
+        INSERT INTO exercises(name, user_id, order_index)
+        VALUES ${placeholders}
+        RETURNING *
+        `, values
+    );
+    return result.rows;
+}
+
+module.exports = { create, createBatch, getExercisesById, findByWorkoutId, existByName, update, remove, updateOrder };
