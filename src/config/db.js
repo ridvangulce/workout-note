@@ -6,8 +6,9 @@ if (!connectionString) {
   throw new Error("DATABASE_URL or POSTGRES_URL is missing");
 }
 
-const isProduction = process.env.NODE_ENV === "production";
-const useSSL = process.env.DB_SSL === "true" || isProduction;
+const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
+// Use SSL for all non-local connections (like Supabase)
+const useSSL = !isLocal;
 
 const pool = new Pool({
   connectionString,
