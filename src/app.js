@@ -15,6 +15,10 @@ const app = express();
 app.use(express.json());
 app.use(logger);
 
+// Enable trust proxy for Vercel/proxies
+app.set('trust proxy', 1);
+
+
 const path = require('path');
 app.use(viewRoutes);
 app.use(express.static(path.join(__dirname, '../public')));
