@@ -9,5 +9,7 @@ router.get('/login', (req, res) => res.sendFile(path.join(publicPath, 'login.htm
 router.get('/register', (req, res) => res.sendFile(path.join(publicPath, 'register.html')));
 router.get('/dashboard', (req, res) => res.sendFile(path.join(publicPath, 'dashboard.html')));
 router.get('/workout-log', (req, res) => res.sendFile(path.join(publicPath, 'workout-log.html')));
+router.get('/forgot-password', (req, res) => res.sendFile(path.join(publicPath, 'forgot-password.html')));
+router.get('/reset-password', (req, res) => res.sendFile(path.join(publicPath, 'reset-password.html')));
 
 module.exports = router;

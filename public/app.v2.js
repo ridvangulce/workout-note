@@ -960,3 +960,93 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupNavLinks() { }
+
+async function handleForgotPassword(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const btn = e.target.querySelector('button');
+
+    setLoading(btn, true);
+    try {
+        const res = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showMessage('success', I18N.t('reset_link_sent'));
+            e.target.reset();
+        } else {
+            throw new Error(data.message || data.error || 'Failed to send reset link');
+        }
+    } catch (err) {
+        showMessage('error', err.message);
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+async function handleResetPassword(e) {
+    e.preventDefault();
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const btn = e.target.querySelector('button');
+
+    // Get token from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    if (!token) {
+        showMessage('error', 'Invalid or missing reset token');
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        showMessage('error', I18N.t('validation.password.match') || "Passwords do not match");
+        return;
+    }
+
+    setLoading(btn, true);
+    try {
+        const res = await fetch('/api/auth/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: token, newPassword })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showMessage('success', I18N.t('password_reset_success'));
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            let errorMessage = data.message || data.error;
+            if (data.details && Array.isArray(data.details)) {
+                errorMessage = data.details.map(d => d.message || d.msg).join(', ');
+            }
+            throw new Error(errorMessage || 'Failed to reset password');
+        }
+    } catch (err) {
+        showMessage('error', err.message);
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+// Add event listeners for new forms
+document.addEventListener('DOMContentLoaded', () => {
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    }
+
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', handleResetPassword);
+    }
+});

@@ -9,6 +9,8 @@ const {
   loginValidation,
   updateProfileValidation,
   updatePasswordValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation
 } = require("../middlewares/validators");
 
 // Public routes with validation and rate limiting
@@ -20,5 +22,10 @@ router.post("/logout", authController.logout);
 // Protected routes with authentication and validation
 router.put('/profile', authMiddleware, updateProfileValidation, validateRequest, authController.updateProfile);
 router.put('/password', authMiddleware, passwordLimiter, updatePasswordValidation, validateRequest, authController.updatePassword);
+
+// Password reset routes (public)
+router.post('/forgot-password', passwordLimiter, forgotPasswordValidation, validateRequest, authController.forgotPassword);
+router.post('/reset-password', passwordLimiter, resetPasswordValidation, validateRequest, authController.resetPassword);
+router.get('/verify-reset-token/:token', authController.verifyResetToken);
 
 module.exports = router;

@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken")
 const crypto = require("crypto");
 const AppError = require("../errors/AppError");
+const emailService = require("./email.service");
 
 const exerciseRepo = require("../repositories/exercise.repository");
 const defaultExercises = require("../constants/defaultExercises");
@@ -119,4 +120,68 @@ const updatePassword = async (userId, currentPassword, newPassword) => {
     await authRepo.updatePassword(userId, hashedPassword);
 }
 
-module.exports = { register, login, refresh, logout, updateProfile, updatePassword };
+const forgotPassword = async (email) => {
+    // Find user by email
+    const user = await authRepo.getUserByEmail(email);
+    if (!user) {
+        // Don't reveal if user exists or not for security
+        return;
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1); // 1 hour expiry
+
+    // Save token to database
+    await authRepo.savePasswordResetToken(user.id, resetToken, expiresAt);
+
+    // Send email
+    await emailService.sendPasswordResetEmail(email, resetToken);
+}
+
+const resetPassword = async (token, newPassword) => {
+    // Find token in database
+    const resetToken = await authRepo.findPasswordResetToken(token);
+    if (!resetToken) {
+        throw new AppError('Invalid or expired reset token', 400);
+    }
+
+    // Check if token is expired
+    if (new Date(resetToken.expires_at) < new Date()) {
+        throw new AppError('Reset token has expired', 400);
+    }
+
+    // Check if token was already used
+    if (resetToken.used) {
+        throw new AppError('Reset token has already been used', 400);
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await authRepo.updatePassword(resetToken.user_id, hashedPassword);
+
+    // Mark token as used
+    await authRepo.markPasswordResetTokenAsUsed(token);
+}
+
+const verifyResetToken = async (token) => {
+    const resetToken = await authRepo.findPasswordResetToken(token);
+    if (!resetToken) {
+        return { valid: false, message: 'Invalid token' };
+    }
+
+    if (new Date(resetToken.expires_at) < new Date()) {
+        return { valid: false, message: 'Token expired' };
+    }
+
+    if (resetToken.used) {
+        return { valid: false, message: 'Token already used' };
+    }
+
+    return { valid: true };
+}
+
+module.exports = { register, login, refresh, logout, updateProfile, updatePassword, forgotPassword, resetPassword, verifyResetToken };
