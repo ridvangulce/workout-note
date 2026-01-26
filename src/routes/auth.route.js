@@ -1,20 +1,24 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
-const pool = require("../config/db");
-const jwt = require("jsonwebtoken");
 const router = express.Router();
-const crypto = require("crypto");
-const AppError = require("../errors/AppError");
 const authController = require("../controllers/auth.controller");
-const authenticateJWT = require("../middlewares/auth");
+const authMiddleware = require("../middlewares/auth");
+const { validateRequest } = require("../middlewares/validation");
+const { loginLimiter, registerLimiter, passwordLimiter } = require("../middlewares/rateLimiter");
+const {
+  registerValidation,
+  loginValidation,
+  updateProfileValidation,
+  updatePasswordValidation,
+} = require("../middlewares/validators");
 
-router.post("/register", authController.register);
-
-router.post("/login", authController.login);
+// Public routes with validation and rate limiting
+router.post("/register", registerLimiter, registerValidation, validateRequest, authController.register);
+router.post("/login", loginLimiter, loginValidation, validateRequest, authController.login);
 router.post("/refresh-token", authController.refresh);
 router.post("/logout", authController.logout);
 
-router.put('/profile', authenticateJWT, authController.updateProfile);
-router.put('/password', authenticateJWT, authController.updatePassword);
+// Protected routes with authentication and validation
+router.put('/profile', authMiddleware, updateProfileValidation, validateRequest, authController.updateProfile);
+router.put('/password', authMiddleware, passwordLimiter, updatePasswordValidation, validateRequest, authController.updatePassword);
 
 module.exports = router;

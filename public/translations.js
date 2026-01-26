@@ -142,7 +142,20 @@ const TRANSLATIONS = {
         "lbl_new_password": "New Password",
         "profile_updated_success": "Profile updated successfully",
         "password_updated_success": "Password updated successfully",
-        "start_workout": "Start Workout"
+        "start_workout": "Start Workout",
+
+        // Validation Errors
+        "validation_failed": "Validation failed",
+        "validation.email.invalid": "Please provide a valid email address",
+        "validation.email.max": "Email must not exceed 254 characters",
+        "validation.password.length": "Password must be between 8 and 128 characters",
+        "validation.password.strength": "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+        "validation.password.different": "New password must be different from current password",
+        "validation.password.required": "Password is required",
+        "validation.password.current_required": "Current password is required",
+        "validation.name.required": "Name is required",
+        "validation.name.length": "Name must be between 2 and 100 characters",
+        "validation.name.format": "Name can only contain letters, spaces, hyphens, and apostrophes"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -287,6 +300,19 @@ const TRANSLATIONS = {
         "lbl_new_password": "Yeni Şifre",
         "profile_updated_success": "Profil başarıyla güncellendi",
         "password_updated_success": "Şifre başarıyla güncellendi",
-        "start_workout": "Antrenman Başlat"
+        "start_workout": "Antrenman Başlat",
+
+        // Validation Errors
+        "validation_failed": "Doğrulama başarısız",
+        "validation.email.invalid": "Lütfen geçerli bir e-posta adresi girin",
+        "validation.email.max": "E-posta 254 karakterden uzun olamaz",
+        "validation.password.length": "Şifre 8 ile 128 karakter arasında olmalıdır",
+        "validation.password.strength": "Şifre en az bir büyük harf, bir küçük harf, bir sayı ve bir özel karakter (@$!%*?&) içermelidir",
+        "validation.password.different": "Yeni şifre mevcut şifreden farklı olmalıdır",
+        "validation.password.required": "Şifre gereklidir",
+        "validation.password.current_required": "Mevcut şifre gereklidir",
+        "validation.name.required": "İsim gereklidir",
+        "validation.name.length": "İsim 2 ile 100 karakter arasında olmalıdır",
+        "validation.name.format": "İsim sadece harf, boşluk, tire ve kesme işareti içerebilir"
     }
 };
