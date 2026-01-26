@@ -30,9 +30,16 @@ module.exports = (err, req, res, next) => {
   if (err.stack) console.error(err.stack);
 
   if (err.isOperational) {
-    return res.status(status).json({
+    const response = {
       error: err.message,
-    });
+    };
+
+    // Include validation details if present
+    if (err.details) {
+      response.details = err.details;
+    }
+
+    return res.status(status).json(response);
   }
 
   return res.status(500).json({
