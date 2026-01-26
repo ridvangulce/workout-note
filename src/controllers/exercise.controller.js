@@ -3,8 +3,8 @@ const exerciseService = require("../services/exercise.service");
 const createExercise = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const { name, target_muscle_group, secondary_muscles } = req.body;
-        const exercise = await exerciseService.createExercise(userId, { name, target_muscle_group, secondary_muscles })
+        const { name, target_muscle_group, secondary_muscles, video_url } = req.body;
+        const exercise = await exerciseService.createExercise(userId, { name, target_muscle_group, secondary_muscles, video_url })
 
         res.status(201).json({ exercise });
     } catch (err) {
@@ -26,8 +26,8 @@ const updateExercise = async (req, res, next) => {
     try {
         const userId = req.user.id;
         const { id } = req.params;
-        const { name, target_muscle_group, secondary_muscles } = req.body;
-        const updated = await exerciseService.updateExercise(userId, id, { name, target_muscle_group, secondary_muscles });
+        const { name, target_muscle_group, secondary_muscles, video_url } = req.body;
+        const updated = await exerciseService.updateExercise(userId, id, { name, target_muscle_group, secondary_muscles, video_url });
         res.json(updated);
     } catch (err) { next(err); }
 };

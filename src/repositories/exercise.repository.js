@@ -1,16 +1,16 @@
 const pool = require("../config/db");
 
-const create = async (userId, name, targetMuscleGroup = null, secondaryMuscles = null) => {
+const create = async (userId, name, targetMuscleGroup = null, secondaryMuscles = null, videoUrl = null) => {
     // Get max order_index to append
     const maxOrderRes = await pool.query('SELECT MAX(order_index) as max_order FROM exercises WHERE user_id = $1', [userId]);
     const nextOrder = (maxOrderRes.rows[0].max_order || 0) + 1;
 
     const result = await pool.query(
         `
-        INSERT INTO exercises(name, user_id, order_index, target_muscle_group, secondary_muscles)
-        VALUES($1, $2, $3, $4, $5)
+        INSERT INTO exercises(name, user_id, order_index, target_muscle_group, secondary_muscles, video_url)
+        VALUES($1, $2, $3, $4, $5, $6)
         RETURNING *
-        `, [name, userId, nextOrder, targetMuscleGroup, secondaryMuscles]
+        `, [name, userId, nextOrder, targetMuscleGroup, secondaryMuscles, videoUrl]
     );
     return result.rows[0];
 }
@@ -18,7 +18,7 @@ const create = async (userId, name, targetMuscleGroup = null, secondaryMuscles =
 const getExercisesById = async (userId) => {
     const result = await pool.query(
         `
-        SELECT id, name, order_index, target_muscle_group, secondary_muscles
+        SELECT id, name, order_index, target_muscle_group, secondary_muscles, video_url
         FROM exercises
         WHERE user_id = $1
         ORDER BY order_index ASC, id ASC
@@ -52,16 +52,17 @@ const existByName = async (userId, name) => {
     return result.rowCount > 0;
 }
 
-const update = async (userId, exerciseId, { name, target_muscle_group, secondary_muscles }) => {
+const update = async (userId, exerciseId, { name, target_muscle_group, secondary_muscles, video_url }) => {
     const result = await pool.query(
         `
         UPDATE exercises
         SET name = COALESCE($1, name),
             target_muscle_group = COALESCE($2, target_muscle_group),
-            secondary_muscles = COALESCE($3, secondary_muscles)
-        WHERE id = $4 AND user_id = $5
+            secondary_muscles = COALESCE($3, secondary_muscles),
+            video_url = COALESCE($4, video_url)
+        WHERE id = $5 AND user_id = $6
         RETURNING *
-        `, [name, target_muscle_group, secondary_muscles, exerciseId, userId]
+        `, [name, target_muscle_group, secondary_muscles, video_url, exerciseId, userId]
     );
     return result.rows[0];
 }
