@@ -85,4 +85,35 @@ const updatePassword = async (req, res, next) => {
     }
 }
 
-module.exports = { register, login, refresh, logout, updateProfile, updatePassword }
+const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        await authService.forgotPassword(email);
+        // Always return success to prevent email enumeration
+        res.json({ message: "If your email exists, you will receive a password reset link" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+const resetPassword = async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body;
+        await authService.resetPassword(token, newPassword);
+        res.json({ message: "Password reset successfully" });
+    } catch (err) {
+        next(err);
+    }
+}
+
+const verifyResetToken = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const result = await authService.verifyResetToken(token);
+        res.json(result);
+    } catch (err) {
+        next(err);
+    }
+}
+
+module.exports = { register, login, refresh, logout, updateProfile, updatePassword, forgotPassword, resetPassword, verifyResetToken }

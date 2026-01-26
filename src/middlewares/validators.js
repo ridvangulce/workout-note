@@ -66,15 +66,33 @@ const updateProfileValidation = [
 const updatePasswordValidation = [
   body('currentPassword')
     .notEmpty()
-    .withMessage('validation.password.current_required'),
-
+    .withMessage('validation.password.required'),
   body('newPassword')
     .isLength({ min: 8, max: 128 })
     .withMessage('validation.password.length')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
     .withMessage('validation.password.strength')
-    .custom((value, { req }) => value !== req.body.currentPassword)
-    .withMessage('validation.password.different'),
+    .trim()
+];
+
+const forgotPasswordValidation = [
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('validation.email.invalid')
+    .normalizeEmail()
+];
+
+const resetPasswordValidation = [
+  body('token')
+    .notEmpty()
+    .withMessage('validation.token.required'),
+  body('newPassword')
+    .isLength({ min: 8, max: 128 })
+    .withMessage('validation.password.length')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .withMessage('validation.password.strength')
+    .trim()
 ];
 
 module.exports = {
@@ -82,4 +100,7 @@ module.exports = {
   loginValidation,
   updateProfileValidation,
   updatePasswordValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation
 };
+
