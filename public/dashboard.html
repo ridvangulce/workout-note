@@ -359,6 +359,20 @@
         </div>
     </div>
 
+    <!-- Video Preview Modal -->
+    <div id="videoPreviewModal" class="modal" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 800px; width: 90%;">
+            <span class="close-modal" onclick="closeModal('videoPreviewModal')">&times;</span>
+            <h2 id="videoPreviewTitle" style="margin-bottom: 1rem;">Video Preview</h2>
+            <div class="video-container"
+                style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <iframe id="videoPreviewFrame"
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Exercise Modal -->
     <div id="addExerciseModal" class="modal">
         <div class="modal-content">
@@ -384,6 +398,46 @@
                         <!-- Populated by JS -->
                     </select>
                 </div>
+
+                <!-- YouTube Integration Section -->
+                <div class="form-group"
+                    style="margin-top: 1.5rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: #ff0000;">▶</span> <span data-i18n="lbl_youtube_video">YouTube Video
+                            Demo</span>
+                    </label>
+
+                    <div id="selectedVideoContainer"
+                        style="display: none; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: 8px; align-items: center; gap: 1rem;">
+                        <img id="selectedVideoThumb" src="" alt="Thumbnail"
+                            style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;">
+                        <div style="flex: 1; overflow: hidden;">
+                            <div id="selectedVideoTitle"
+                                style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;">
+                            </div>
+                            <a id="selectedVideoLink" href="#" target="_blank"
+                                style="font-size: 0.75rem; color: var(--primary-color);">View Video</a>
+                        </div>
+                        <button type="button" class="btn-icon" id="removeVideoBtn" style="color: #ff4d4d;">✕</button>
+                    </div>
+
+                    <input type="hidden" id="videoUrl" name="videoUrl">
+
+                    <div style="position: relative;">
+                        <input type="text" id="videoSearchInput"
+                            placeholder="Search YouTube (e.g., Bench Press Form)..." style="padding-right: 2rem;">
+                        <div id="videoSearchLoader"
+                            style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted);">
+                            ⟳
+                        </div>
+                    </div>
+
+                    <div id="videoSearchResults"
+                        style="display: none; margin-top: 0.5rem; max-height: 200px; overflow-y: auto; background: #1a1a24; border: 1px solid var(--glass-border); border-radius: 8px;">
+                        <!-- Results populated via JS -->
+                    </div>
+                </div>
+
                 <button type="submit" id="addExerciseSubmitBtn" class="btn btn-primary btn-block"
                     data-i18n="add_exercise">Add Exercise</button>
             </form>

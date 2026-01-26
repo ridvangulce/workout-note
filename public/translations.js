@@ -167,7 +167,8 @@ const TRANSLATIONS = {
         "validation.password.current_required": "Current password is required",
         "validation.name.required": "Name is required",
         "validation.name.length": "Name must be between 2 and 100 characters",
-        "validation.name.format": "Name can only contain letters, spaces, hyphens, and apostrophes"
+        "validation.name.format": "Name can only contain letters, spaces, hyphens, and apostrophes",
+        "lbl_youtube_video": "YouTube Video"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -337,6 +338,7 @@ const TRANSLATIONS = {
         "validation.password.current_required": "Mevcut şifre gereklidir",
         "validation.name.required": "İsim gereklidir",
         "validation.name.length": "İsim 2 ile 100 karakter arasında olmalıdır",
-        "validation.name.format": "İsim sadece harf, boşluk, tire ve kesme işareti içerebilir"
+        "validation.name.format": "İsim sadece harf, boşluk, tire ve kesme işareti içerebilir",
+        "lbl_youtube_video": "YouTube Video"
     }
 };
