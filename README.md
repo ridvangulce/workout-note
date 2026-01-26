@@ -14,16 +14,20 @@
 *   **Intuitive Workout Logging:** Effortlessly log your sets, reps, and weights with a human-centric interface.
 *   **Interactive Body Map:** Visualize muscle engagement and filter exercises using an interactive anatomical SVG map.
 *   **Progress Analytics:** Track your volume and sets over time with built-in charts and history.
-*   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content.
+*   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content and validation messages.
 *   **Smart Routines:** Create and manage personalized workout routines for efficient training sessions.
-*   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication.
+*   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication and comprehensive input validation.
+*   **Rate Limiting:** Built-in protection against brute force attacks with intelligent rate limiting.
+*   **Input Validation:** Comprehensive validation rules with localized error messages for better user experience.
 
 ### Technology Stack
 *   **Frontend:** Vanilla JS, CSS3, Semantic HTML5
 *   **Backend:** Node.js & Express
-*   **Database:** PostgreSQL
+*   **Database:** PostgreSQL (with Supabase support)
 *   **Authentication:** JWT (JSON Web Tokens) with Cookie support
 *   **Visualization:** Chart.js, Interactive SVG Map
+*   **Validation:** Express-validator with i18n support
+*   **Security:** Rate limiting, input sanitization, XSS protection
 
 ### Installation
 
@@ -41,18 +45,29 @@
 3.  **Configuration:**
     Create a `.env` file in the root directory:
     ```env
-    PORT=3000
-    DB_HOST=localhost
-    DB_USER=your_user
-    DB_PASSWORD=your_password
-    DB_NAME=workout_db
+    PORT=8080
+    DATABASE_URL=postgresql://user:password@host:port/database
     JWT_SECRET=your_secret_key
+    NODE_ENV=production  # Optional, auto-detects SSL for remote databases
     ```
 
 4.  **Run the application:**
     ```bash
     npm run dev
     ```
+
+### Security Features
+*   **JWT Authentication** - Secure token-based authentication
+*   **Rate Limiting** - Protects endpoints from abuse:
+    *   Login: 5 attempts per 15 minutes
+    *   Registration: 3 attempts per hour
+    *   Password changes: 3 attempts per hour
+*   **Input Validation** - Comprehensive validation rules:
+    *   Email format validation (RFC 5322)
+    *   Strong password requirements (min 8 chars, uppercase, lowercase, number, special char)
+    *   Input sanitization to prevent XSS attacks
+*   **SQL Injection Protection** - Parameterized queries throughout
+*   **SSL/TLS Support** - Automatic SSL configuration for production databases
 
 ---
 
@@ -66,16 +81,20 @@
 *   **Sezgisel Antrenman Kaydı:** Setlerinizi, tekrarlarınızı ve ağırlıklarınızı insan odaklı bir arayüzle zahmetsizce kaydedin.
 *   **Etkileşimli Vücut Haritası:** Etkileşimli anatomik SVG haritası ile kas katılımını görselleştirin ve egzersizleri filtreleyin.
 *   **Gelişim Analizi:** Dahili grafikler ve geçmişle hacim ve set sayınızı zaman içinde takip edin.
-*   **Çoklu Dil Desteği:** Dinamik içerik dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
+*   **Çoklu Dil Desteği:** Dinamik içerik ve doğrulama mesajları dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
 *   **Akıllı Rutinler:** Verimli antrenman seansları için kişiselleştirilmiş rutinler oluşturun ve yönetin.
-*   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ile kişisel kullanıcı profilleri.
+*   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ve kapsamlı girdi doğrulama ile kişisel kullanıcı profilleri.
+*   **Hız Sınırlama:** Akıllı hız sınırlama ile kaba kuvvet saldırılarına karşı yerleşik koruma.
+*   **Girdi Doğrulama:** Daha iyi kullanıcı deneyimi için yerelleştirilmiş hata mesajlarıyla kapsamlı doğrulama kuralları.
 
 ### Teknoloji Yığını
 *   **Frontend:** Vanilla JS, CSS3, Semantik HTML5
 *   **Backend:** Node.js & Express
-*   **Database:** PostgreSQL
+*   **Database:** PostgreSQL (Supabase desteği ile)
 *   **Kimlik Doğrulama:** JWT (JSON Web Tokens), Çerez desteği ile
 *   **Görselleştirme:** Chart.js, Etkileşimli SVG Haritası
+*   **Doğrulama:** Express-validator ile i18n desteği
+*   **Güvenlik:** Hız sınırlama, girdi temizleme, XSS koruması
 
 ### Kurulum
 
@@ -93,15 +112,26 @@
 3.  **Yapılandırma:**
     Kök dizinde bir `.env` dosyası oluşturun:
     ```env
-    PORT=3000
-    DB_HOST=localhost
-    DB_USER=kullanici_adiniz
-    DB_PASSWORD=sifreniz
-    DB_NAME=workout_db
+    PORT=8080
+    DATABASE_URL=postgresql://kullanici:sifre@host:port/veritabani
     JWT_SECRET=gizli_anahtariniz
+    NODE_ENV=production  # Opsiyonel, uzak veritabanları için SSL'i otomatik algılar
     ```
 
 4.  **Uygulamayı çalıştırın:**
     ```bash
     npm run dev
     ```
+
+### Güvenlik Özellikleri
+*   **JWT Kimlik Doğrulama** - Güvenli token tabanlı doğrulama
+*   **Hız Sınırlama** - Uç noktaları kötüye kullanıma karşı korur:
+    *   Giriş: 15 dakikada 5 deneme
+    *   Kayıt: Saatte 3 deneme
+    *   Şifre değişiklikleri: Saatte 3 deneme
+*   **Girdi Doğrulama** - Kapsamlı doğrulama kuralları:
+    *   E-posta format doğrulama (RFC 5322)
+    *   Güçlü şifre gereksinimleri (min 8 karakter, büyük/küçük harf, sayı, özel karakter)
+    *   XSS saldırılarını önlemek için girdi temizleme
+*   **SQL Enjeksiyon Koruması** - Parametreli sorgular
+*   **SSL/TLS Desteği** - Production veritabanları için otomatik SSL yapılandırması

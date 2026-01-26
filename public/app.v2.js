@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentEditingRoutineId = null;
                     updateDashboardUI(); // Refresh list
                     createRoutineForm.reset();
-                    window.switchView('workouts');
+                    window.switchView('routines');
                 } else {
                     alert('Failed to save routine');
                 }
@@ -228,6 +228,27 @@ async function handleUpdatePassword(e) {
     }
 }
 
+// --- Validation Error Translation Helper ---
+
+/**
+ * Translates backend validation errors to user's language
+ * @param {Object} data - Response data from backend
+ * @returns {string} - Translated error message
+ */
+function translateValidationError(data) {
+    // If there's a details array (validation errors), translate each one
+    if (data.details && Array.isArray(data.details)) {
+        const translatedErrors = data.details.map(detail => {
+            const translatedMessage = I18N.t(detail.message) || detail.message;
+            return `${detail.field}: ${translatedMessage}`;
+        });
+        return translatedErrors.join('\n');
+    }
+
+    // Otherwise translate the main error message
+    return I18N.t(data.error) || data.error || I18N.t('error_generic');
+}
+
 // --- Auth Handling ---
 
 async function handleLogin(e) {
@@ -257,7 +278,7 @@ async function handleLogin(e) {
             showMessage('success', I18N.t('login_success'));
             setTimeout(() => { window.location.href = '/dashboard'; }, 1000);
         } else {
-            showMessage('error', data.error === 'Invalid credentials' ? I18N.t('invalid_credentials') : (data.error || data.message || I18N.t('error_generic')));
+            showMessage('error', translateValidationError(data));
         }
     } catch (error) {
         console.error(error);
@@ -288,7 +309,7 @@ async function handleRegister(e) {
             showMessage('success', I18N.t('register_success'));
             setTimeout(() => { window.location.href = '/login'; }, 1500);
         } else {
-            showMessage('error', data.error || data.message || I18N.t('error_generic'));
+            showMessage('error', translateValidationError(data));
         }
     } catch (error) {
         console.error(error);
@@ -519,7 +540,14 @@ async function updateDashboardUI() {
 
 window.switchView = function (viewName) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-    document.getElementById(`${viewName}-view`).style.display = 'block';
+
+    const targetView = document.getElementById(`${viewName}-view`);
+    if (targetView) {
+        targetView.style.display = 'block';
+    } else {
+        console.warn(`View element "${viewName}-view" not found`);
+        return;
+    }
 
     document.querySelectorAll('.sidebar-menu a').forEach(el => {
         if (el.dataset.view === viewName) el.parentElement.classList.add('active');
