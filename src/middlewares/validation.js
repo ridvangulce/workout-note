@@ -16,7 +16,7 @@ const validateRequest = (req, res, next) => {
     }));
 
     throw new AppError(
-      'Validation failed',
+      'validation_failed', // Translation key
       400,
       errorMessages
     );

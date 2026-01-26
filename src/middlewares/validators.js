@@ -2,30 +2,31 @@ const { body } = require('express-validator');
 
 /**
  * Validation rules for user registration
+ * Returns translation keys for frontend i18n
  */
 const registerValidation = [
   body('email')
     .trim()
     .isEmail()
-    .withMessage('Please provide a valid email address')
+    .withMessage('validation.email.invalid')
     .normalizeEmail()
     .isLength({ max: 254 })
-    .withMessage('Email must not exceed 254 characters'),
+    .withMessage('validation.email.max'),
 
   body('password')
     .isLength({ min: 8, max: 128 })
-    .withMessage('Password must be between 8 and 128 characters')
+    .withMessage('validation.password.length')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)'),
+    .withMessage('validation.password.strength'),
 
   body('name')
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
+    .withMessage('validation.name.required')
     .isLength({ min: 2, max: 100 })
-    .withMessage('Name must be between 2 and 100 characters')
+    .withMessage('validation.name.length')
     .matches(/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s'-]+$/)
-    .withMessage('Name can only contain letters, spaces, hyphens, and apostrophes')
+    .withMessage('validation.name.format')
     .escape(),
 ];
 
@@ -36,12 +37,12 @@ const loginValidation = [
   body('email')
     .trim()
     .isEmail()
-    .withMessage('Please provide a valid email address')
+    .withMessage('validation.email.invalid')
     .normalizeEmail(),
 
   body('password')
     .notEmpty()
-    .withMessage('Password is required'),
+    .withMessage('validation.password.required'),
 ];
 
 /**
@@ -51,11 +52,11 @@ const updateProfileValidation = [
   body('name')
     .trim()
     .notEmpty()
-    .withMessage('Name is required')
+    .withMessage('validation.name.required')
     .isLength({ min: 2, max: 100 })
-    .withMessage('Name must be between 2 and 100 characters')
+    .withMessage('validation.name.length')
     .matches(/^[a-zA-ZğüşıöçĞÜŞİÖÇ\s'-]+$/)
-    .withMessage('Name can only contain letters, spaces, hyphens, and apostrophes')
+    .withMessage('validation.name.format')
     .escape(),
 ];
 
@@ -65,15 +66,15 @@ const updateProfileValidation = [
 const updatePasswordValidation = [
   body('currentPassword')
     .notEmpty()
-    .withMessage('Current password is required'),
+    .withMessage('validation.password.current_required'),
 
   body('newPassword')
     .isLength({ min: 8, max: 128 })
-    .withMessage('New password must be between 8 and 128 characters')
+    .withMessage('validation.password.length')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
-    .withMessage('New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)')
+    .withMessage('validation.password.strength')
     .custom((value, { req }) => value !== req.body.currentPassword)
-    .withMessage('New password must be different from current password'),
+    .withMessage('validation.password.different'),
 ];
 
 module.exports = {
