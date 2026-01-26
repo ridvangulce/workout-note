@@ -1,7 +1,7 @@
 const exerciseRepo = require("../repositories/exercise.repository");
 const AppError = require("../errors/AppError");
 
-const createExercise = async (userId, { name, target_muscle_group, secondary_muscles }) => {
+const createExercise = async (userId, { name, target_muscle_group, secondary_muscles, video_url }) => {
     if (!name) {
         throw new AppError("Name is missing!", 404);
     }
@@ -9,7 +9,7 @@ const createExercise = async (userId, { name, target_muscle_group, secondary_mus
     if (isExerciseExist) {
         throw new AppError("Exercise already exist!", 409);
     }
-    const exercise = await exerciseRepo.create(userId, name, target_muscle_group, secondary_muscles);
+    const exercise = await exerciseRepo.create(userId, name, target_muscle_group, secondary_muscles, video_url);
     return exercise;
 };
 

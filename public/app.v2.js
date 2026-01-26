@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = document.getElementById('exerciseName').value;
             const target_muscle_group = document.getElementById('targetMuscle').value;
             const secondary_muscles = $('#secondaryMuscleSelect').val() ? $('#secondaryMuscleSelect').val().join(', ') : '';
+            const video_url = document.getElementById('videoUrl').value;
 
             try {
                 let url = '/api/exercises';
@@ -73,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const res = await fetchWithAuth(url, {
                     method: method,
-                    body: { name, target_muscle_group, secondary_muscles }
+                    body: { name, target_muscle_group, secondary_muscles, video_url }
                 });
 
                 if (res.ok) {
@@ -157,10 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingsProfileForm) {
         settingsProfileForm.addEventListener('submit', handleUpdateProfile);
     }
-    const settingsPasswordForm = document.getElementById('settingsPasswordForm');
     if (settingsPasswordForm) {
         settingsPasswordForm.addEventListener('submit', handleUpdatePassword);
     }
+
+    setupVideoSearch();
 });
 
 // --- Settings Handlers ---
@@ -402,10 +404,18 @@ async function updateDashboardUI() {
             }
             if (exercises.length === 0) selectContainer.innerHTML = `<div class="empty-state">${I18N.t('loading_exercises')}</div>`;
             else selectContainer.innerHTML = exercises.map(ex => `
-                    <label class="exercise-checkbox-item" data-name="${ex.name.toLowerCase()}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}">
-                        <input type="checkbox" value="${ex.id}" name="exercises">
-                        ${ex.name}
-                    </label>
+                    <div class="exercise-checkbox-item-wrapper" style="display:flex; align-items:center; gap:0.5rem; width:100%;"> 
+                        <label class="exercise-checkbox-item" data-name="${ex.name.toLowerCase()}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}" style="flex:1;">
+                            <input type="checkbox" value="${ex.id}" name="exercises">
+                            ${ex.name}
+                        </label>
+                        ${ex.video_url ? `
+                            <button type="button" class="btn-icon" style="background:rgba(255,0,0,0.1); width:32px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#ff4d4d;" 
+                                onclick="openVideoPreview('${ex.video_url}', '${ex.name.replace(/'/g, "\\'")}')" title="Preview Video">
+                                ▶
+                            </button>
+                        ` : ''}
+                    </div>
                 `).join('');
 
             // Render Draggable List
@@ -417,12 +427,15 @@ async function updateDashboardUI() {
                                 <div class="exercise-content">
                                     <span class="drag-handle">☰</span>
                                     <div style="display:flex; flex-direction:column;">
-                                        <span class="exercise-name" style="font-weight:600;">${ex.name}</span>
+                                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                                            <span class="exercise-name" style="font-weight:600;">${ex.name}</span>
+                                            ${ex.video_url ? `<a href="${ex.video_url}" target="_blank" style="color:#ff0000; text-decoration:none;" title="Watch Video">▶</a>` : ''}
+                                        </div>
                                         ${ex.target_muscle_group ? `<span style="font-size:0.75rem; color:var(--text-muted);">${I18N.t('muscle_' + ex.target_muscle_group)}${ex.secondary_muscles ? ' · ' + ex.secondary_muscles.split(', ').map(m => I18N.t('muscle_' + m)).join(', ') : ''}</span>` : ''}
                                     </div>
                                 </div>
                                 <div class="exercise-actions">
-                                    <button class="btn-icon" onclick="editExercise('${ex.id}', '${ex.name}', '${ex.target_muscle_group || ''}', '${ex.secondary_muscles || ''}')">✏️</button>
+                                    <button class="btn-icon" onclick="editExercise('${ex.id}', '${ex.name.replace(/'/g, "\\'")}', '${ex.target_muscle_group || ''}', '${(ex.secondary_muscles || '').replace(/'/g, "\\'")}', '${ex.video_url || ''}')">✏️</button>
                                     <button class="btn-icon" onclick="deleteExercise('${ex.id}')">🗑️</button>
                                 </div>
                             </div>
@@ -588,8 +601,26 @@ window.closeModal = function (modalId) {
         if (modalId === 'addExerciseModal') {
             currentEditingExerciseId = null;
         }
+        if (modalId === 'videoPreviewModal') {
+            const frame = document.getElementById('videoPreviewFrame');
+            if (frame) frame.src = ''; // Stop video playback
+        }
         modal.style.display = 'none';
     }
+}
+
+window.openVideoPreview = function (url, title) {
+    if (!url) return;
+    const videoId = url.match(/v=([^&]+)/) ? url.match(/v=([^&]+)/)[1] : null;
+    if (!videoId) {
+        // Fallback for non-youtube links (though we mainly support yt)
+        window.open(url, '_blank');
+        return;
+    }
+
+    document.getElementById('videoPreviewTitle').textContent = title || 'Video Preview';
+    document.getElementById('videoPreviewFrame').src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    document.getElementById('videoPreviewModal').style.display = 'block';
 }
 
 window.startWorkout = function (routineId) {
@@ -699,12 +730,42 @@ function showMessage(type, text) {
     }
 }
 
-window.editExercise = async function (id, name, target, secondary) {
+window.editExercise = async function (id, name, target, secondary, videoUrl) {
     currentEditingExerciseId = id;
 
     // Populate Modal
     document.getElementById('exerciseName').value = name;
     document.getElementById('targetMuscle').value = target || "";
+
+    // Handle Video
+    const videoContainer = document.getElementById('selectedVideoContainer');
+    const searchInput = document.getElementById('videoSearchInput');
+    const videoUrlInput = document.getElementById('videoUrl');
+
+    if (videoUrl && videoUrl !== 'undefined') {
+        const videoId = videoUrl.match(/v=([^&]+)/) ? videoUrl.match(/v=([^&]+)/)[1] : null;
+        if (videoId) {
+            document.getElementById('selectedVideoThumb').src = `https://img.youtube.com/vi/${videoId}/default.jpg`;
+            document.getElementById('selectedVideoTitle').textContent = 'Attached Video';
+            const link = document.getElementById('selectedVideoLink');
+            link.href = videoUrl;
+            link.textContent = 'View Video';
+
+            videoContainer.style.display = 'flex';
+            searchInput.parentElement.style.display = 'none';
+            videoUrlInput.value = videoUrl;
+        } else {
+            // Clean state if URL is weird
+            videoContainer.style.display = 'none';
+            searchInput.parentElement.style.display = 'block';
+            videoUrlInput.value = '';
+        }
+    } else {
+        videoContainer.style.display = 'none';
+        searchInput.parentElement.style.display = 'block';
+        videoUrlInput.value = '';
+        searchInput.value = '';
+    }
 
     document.getElementById('addExerciseModalTitle').textContent = I18N.t('edit_exercise');
     document.getElementById('addExerciseSubmitBtn').textContent = I18N.t('update_exercise');
@@ -716,6 +777,103 @@ window.editExercise = async function (id, name, target, secondary) {
     }
 
     window.openModal('addExerciseModal');
+}
+
+function setupVideoSearch() {
+    const input = document.getElementById('videoSearchInput');
+    const results = document.getElementById('videoSearchResults');
+    const loader = document.getElementById('videoSearchLoader');
+    const container = document.getElementById('selectedVideoContainer');
+    const removeBtn = document.getElementById('removeVideoBtn');
+    const hiddenInput = document.getElementById('videoUrl');
+
+    if (!input) return;
+
+    let debounceTimer;
+
+    input.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        const query = e.target.value.trim();
+
+        if (query.length < 2) {
+            results.style.display = 'none';
+            return;
+        }
+
+        debounceTimer = setTimeout(async () => {
+            loader.style.display = 'block';
+            try {
+                // Call our backend proxy
+                const res = await fetchWithAuth(`/api/integrations/youtube-search?q=${encodeURIComponent(query)}`);
+                if (res.ok) {
+                    const items = await res.json();
+                    renderVideoResults(items);
+                } else {
+                    console.warn('Search failed');
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                loader.style.display = 'none';
+            }
+        }, 500); // 500ms debounce
+    });
+
+    removeBtn.addEventListener('click', () => {
+        container.style.display = 'none';
+        input.parentElement.style.display = 'block';
+        hiddenInput.value = '';
+        input.value = '';
+        input.focus();
+    });
+}
+
+function renderVideoResults(items) {
+    const results = document.getElementById('videoSearchResults');
+    if (!items || items.length === 0) {
+        results.style.display = 'none';
+        return;
+    }
+
+    results.innerHTML = items.map(item => `
+        <div class="video-result-item">
+            <div class="video-result-content" 
+                 onclick="selectVideo('${item.id}', '${item.title.replace(/'/g, "\\'")}', '${item.channel}', '${item.thumbnail}')">
+                <img src="${item.thumbnail}" class="video-thumb" alt="Thumbnail">
+                <div class="video-info">
+                    <div class="video-title">${item.title}</div>
+                    <div class="video-channel">${item.channel}</div>
+                </div>
+            </div>
+            <button type="button" class="video-preview-btn" 
+                onclick="openVideoPreview('https://www.youtube.com/watch?v=${item.id}', '${item.title.replace(/'/g, "\\'")}')"
+                title="Preview">
+                👁️
+            </button>
+        </div>
+    `).join('');
+
+    results.style.display = 'block';
+}
+
+window.selectVideo = function (id, title, channel, thumb) {
+    const container = document.getElementById('selectedVideoContainer');
+    const inputWrapper = document.getElementById('videoSearchInput').parentElement;
+    const results = document.getElementById('videoSearchResults');
+
+    document.getElementById('selectedVideoThumb').src = thumb;
+    document.getElementById('selectedVideoTitle').textContent = title;
+
+    const link = document.getElementById('selectedVideoLink');
+    const url = `https://www.youtube.com/watch?v=${id}`;
+    link.href = url;
+    link.textContent = 'View Video';
+
+    document.getElementById('videoUrl').value = url;
+
+    results.style.display = 'none';
+    inputWrapper.style.display = 'none';
+    container.style.display = 'flex';
 }
 
 window.deleteExercise = async function (id) {
