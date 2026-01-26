@@ -14,6 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(logger);
+
 const path = require('path');
 app.use(viewRoutes);
 app.use(express.static(path.join(__dirname, '../public')));
