@@ -101,4 +101,47 @@ const getUserById = async (userId) => {
     return result.rows[0];
 };
 
-module.exports = { register, checkUser, getUserByEmail, saveRefreshToken, findRefreshToken, deleteRefreshToken, updateProfile, updatePassword, getUserById };
+const savePasswordResetToken = async (userId, token, expiresAt) => {
+    await pool.query(
+        `
+        INSERT INTO password_reset_tokens(user_id, token, expires_at)
+        VALUES($1, $2, $3)
+        `, [userId, token, expiresAt]
+    );
+};
+
+const findPasswordResetToken = async (token) => {
+    const result = await pool.query(
+        `
+        SELECT user_id, token, expires_at, used
+        FROM password_reset_tokens
+        WHERE token = $1
+        `, [token]
+    );
+    return result.rows[0];
+};
+
+const markPasswordResetTokenAsUsed = async (token) => {
+    await pool.query(
+        `
+        UPDATE password_reset_tokens
+        SET used = TRUE
+        WHERE token = $1
+        `, [token]
+    );
+};
+
+module.exports = {
+    register,
+    checkUser,
+    getUserByEmail,
+    saveRefreshToken,
+    findRefreshToken,
+    deleteRefreshToken,
+    updateProfile,
+    updatePassword,
+    getUserById,
+    savePasswordResetToken,
+    findPasswordResetToken,
+    markPasswordResetTokenAsUsed
+};
