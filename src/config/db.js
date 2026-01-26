@@ -6,7 +6,8 @@ if (!connectionString) {
   throw new Error("DATABASE_URL or POSTGRES_URL is missing");
 }
 
-const useSSL = process.env.DB_SSL === "true";
+const isProduction = process.env.NODE_ENV === "production";
+const useSSL = process.env.DB_SSL === "true" || isProduction;
 
 const pool = new Pool({
   connectionString,
