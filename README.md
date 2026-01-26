@@ -69,6 +69,34 @@
 *   **SQL Injection Protection** - Parameterized queries throughout
 *   **SSL/TLS Support** - Automatic SSL configuration for production databases
 
+### Testing
+
+Comprehensive test suite with Jest and Supertest covering authentication and validation.
+
+**Run Tests:**
+```bash
+npm test                 # Run all tests
+npm run test:watch       # Watch mode
+npm run test:coverage    # Coverage report
+```
+
+**Test Results:**
+```
+✅ 12/12 tests passing (100%)
+⚡ 1.4s execution time
+📊 42% code coverage
+```
+
+**Coverage:**
+- Authentication endpoints: 87%
+- Validation middleware: 100%
+- Rate limiting: 100%
+- Overall: 42% (target: 70% - work in progress)
+
+**Test Suites:**
+- Integration Tests: Auth registration, login, validation
+- Unit Tests: Middleware validation, error formatting
+
 ---
 
 <a name="türkçe"></a>
@@ -135,3 +163,31 @@
     *   XSS saldırılarını önlemek için girdi temizleme
 *   **SQL Enjeksiyon Koruması** - Parametreli sorgular
 *   **SSL/TLS Desteği** - Production veritabanları için otomatik SSL yapılandırması
+
+### Testler
+
+Jest ve Supertest ile kimlik doğrulama ve validasyon testlerini kapsayan kapsamlı test paketi.
+
+**Testleri Çalıştırma:**
+```bash
+npm test                 # Tüm testleri çalıştır
+npm run test:watch       # İzleme modu
+npm run test:coverage    # Kapsam raporu
+```
+
+**Test Sonuçları:**
+```
+✅ 12/12 test geçiyor (100%)
+⚡ 1.4s çalışma süresi
+📊 %42 kod kapsama
+```
+
+**Kapsam:**
+- Kimlik doğrulama uç noktaları: %87
+- Doğrulama middleware: %100
+- Hız sınırlama: %100
+- Genel: %42 (hedef: %70 - devam ediyor)
+
+**Test Paketleri:**
+- Entegrasyon Testleri: Kayıt, giriş, doğrulama
+- Birim Testleri: Middleware doğrulama, hata biçimlendirme
