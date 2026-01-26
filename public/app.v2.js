@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     currentEditingRoutineId = null;
                     updateDashboardUI(); // Refresh list
                     createRoutineForm.reset();
-                    window.switchView('workouts');
+                    window.switchView('routines');
                 } else {
                     alert('Failed to save routine');
                 }
@@ -540,7 +540,14 @@ async function updateDashboardUI() {
 
 window.switchView = function (viewName) {
     document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
-    document.getElementById(`${viewName}-view`).style.display = 'block';
+
+    const targetView = document.getElementById(`${viewName}-view`);
+    if (targetView) {
+        targetView.style.display = 'block';
+    } else {
+        console.warn(`View element "${viewName}-view" not found`);
+        return;
+    }
 
     document.querySelectorAll('.sidebar-menu a').forEach(el => {
         if (el.dataset.view === viewName) el.parentElement.classList.add('active');
