@@ -16,6 +16,7 @@
 *   **Progress Analytics:** Track your volume and sets over time with built-in charts and history.
 *   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content and validation messages.
 *   **Smart Routines:** Create and manage personalized workout routines for efficient training sessions.
+*   **Password Management:** Secure password reset flow via email with time-limited tokens.
 *   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication and comprehensive input validation.
 *   **Rate Limiting:** Built-in protection against brute force attacks with intelligent rate limiting.
 *   **Input Validation:** Comprehensive validation rules with localized error messages for better user experience.
@@ -48,6 +49,13 @@
     PORT=8080
     DATABASE_URL=postgresql://user:password@host:port/database
     JWT_SECRET=your_secret_key
+
+    # Email Configuration (Required for Password Reset)
+    EMAIL_USER=your-email@gmail.com
+    EMAIL_PASSWORD=your-app-password  # Gmail App Password (16 chars)
+    EMAIL_FROM=noreply@workoutnote.com
+    FRONTEND_URL=http://localhost:8080
+
     NODE_ENV=production  # Optional, auto-detects SSL for remote databases
     ```
 
@@ -68,6 +76,11 @@
     *   Input sanitization to prevent XSS attacks
 *   **SQL Injection Protection** - Parameterized queries throughout
 *   **SSL/TLS Support** - Automatic SSL configuration for production databases
+*   **Forgot Password Security:**
+    *   256-bit crypto-random tokens
+    *   1-hour token expiration
+    *   One-time use tokens (prevent replay attacks)
+    *   No user enumeration (consistent response times)
 
 ### Testing
 
@@ -111,6 +124,7 @@ npm run test:coverage    # Coverage report
 *   **Gelişim Analizi:** Dahili grafikler ve geçmişle hacim ve set sayınızı zaman içinde takip edin.
 *   **Çoklu Dil Desteği:** Dinamik içerik ve doğrulama mesajları dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
 *   **Akıllı Rutinler:** Verimli antrenman seansları için kişiselleştirilmiş rutinler oluşturun ve yönetin.
+*   **Şifre Yönetimi:** E-posta yoluyla güvenli, süreli tokenlar ile şifre sıfırlama akışı.
 *   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ve kapsamlı girdi doğrulama ile kişisel kullanıcı profilleri.
 *   **Hız Sınırlama:** Akıllı hız sınırlama ile kaba kuvvet saldırılarına karşı yerleşik koruma.
 *   **Girdi Doğrulama:** Daha iyi kullanıcı deneyimi için yerelleştirilmiş hata mesajlarıyla kapsamlı doğrulama kuralları.
@@ -143,6 +157,13 @@ npm run test:coverage    # Coverage report
     PORT=8080
     DATABASE_URL=postgresql://kullanici:sifre@host:port/veritabani
     JWT_SECRET=gizli_anahtariniz
+
+    # E-posta Yapılandırması (Şifre Sıfırlama için Gerekli)
+    EMAIL_USER=eposta@gmail.com
+    EMAIL_PASSWORD=uygulama-sifresi  # Gmail Uygulama Şifresi (16 karakter)
+    EMAIL_FROM=noreply@workoutnote.com
+    FRONTEND_URL=http://localhost:8080
+
     NODE_ENV=production  # Opsiyonel, uzak veritabanları için SSL'i otomatik algılar
     ```
 
@@ -163,6 +184,11 @@ npm run test:coverage    # Coverage report
     *   XSS saldırılarını önlemek için girdi temizleme
 *   **SQL Enjeksiyon Koruması** - Parametreli sorgular
 *   **SSL/TLS Desteği** - Production veritabanları için otomatik SSL yapılandırması
+*   **Şifre Sıfırlama Güvenliği:**
+    *   256-bit kripto-rastgele tokenlar
+    *   1 saatlik token süresi
+    *   Tek kullanımlık tokenlar (tekrar saldırılarını önler)
+    *   Kullanıcı sıralama koruması (tutarlı yanıt süreleri)
 
 ### Testler
 
