@@ -11,6 +11,7 @@ const cookieParser = require("cookie-parser");
 const auth = require("./routes/auth.route");
 const viewRoutes = require("./routes/views.route");
 const integrationRoutes = require("./routes/integration.routes");
+const mealRoutes = require("./routes/meal.routes");
 const app = express();
 
 app.use(express.json());
@@ -26,6 +27,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser());
 app.use('/api/auth', auth); // Public routes first
 app.use('/api/integrations', integrationRoutes);
+app.use('/api/meals', mealRoutes);
 
 app.use(healthRoutes);
 app.use(workoutRoutes); // These define their own /api/ paths

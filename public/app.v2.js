@@ -47,9 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Navigation & Interaction
     document.querySelectorAll('.sidebar-menu a').forEach(link => {
         link.addEventListener('click', (e) => {
+            const targetLink = e.target.closest('a');
+            const view = targetLink.dataset.view;
+
+            // Allow links without data-view (external pages like /nutrition) to navigate normally
+            if (!view) {
+                return; // Let browser handle the navigation
+            }
+
+            // Handle SPA view switching for dashboard
             e.preventDefault();
-            const view = e.target.closest('a').dataset.view;
-            if (view && window.switchView) window.switchView(view);
+            if (window.switchView) window.switchView(view);
         });
     });
 
@@ -547,6 +555,30 @@ async function updateDashboardUI() {
             }
         }
     } catch (e) { console.error(e); }
+
+    // 4. Fetch Nutrition Summary for Overview
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetchWithAuth(`/api/meals/summary?date=${today}`);
+        if (res.ok) {
+            const data = await res.json();
+            const summary = data.summary || {};
+
+            // Update overview nutrition card
+            const overviewCalories = document.getElementById('overviewCalories');
+            const overviewProtein = document.getElementById('overviewProtein');
+            const overviewCarbs = document.getElementById('overviewCarbs');
+            const overviewFat = document.getElementById('overviewFat');
+
+            if (overviewCalories) {
+                const calories = Math.round(summary.total_calories || 0);
+                overviewCalories.innerHTML = `${calories} <span style="font-size: 0.8rem; color: var(--text-muted);">kcal</span>`;
+            }
+            if (overviewProtein) overviewProtein.textContent = Math.round(summary.total_protein || 0);
+            if (overviewCarbs) overviewCarbs.textContent = Math.round(summary.total_carbs || 0);
+            if (overviewFat) overviewFat.textContent = Math.round(summary.total_fat || 0);
+        }
+    } catch (e) { console.error('Nutrition summary load error:', e); }
 }
 
 // --- Global Functions ---
@@ -566,6 +598,11 @@ window.switchView = function (viewName) {
         if (el.dataset.view === viewName) el.parentElement.classList.add('active');
         else el.parentElement.classList.remove('active');
     });
+
+    // Initialize views when switched
+    if (viewName === 'nutrition' && typeof initNutritionView === 'function') {
+        initNutritionView();
+    }
 }
 
 window.openModal = function (modalId) {

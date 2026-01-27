@@ -27,6 +27,20 @@ const TRANSLATIONS = {
         "stat_exercises": "Exercises",
         "stat_uptime": "Active Users",
         "stat_response": "Tracked Days",
+        "muscle_group": "Muscle Group",
+
+        // Nutrition Analytics
+        "nutrition_analytics": "Nutrition Analytics",
+        "nutrition_today": "Today's Nutrition",
+        "today_btn": "Today",
+        "time_period_day": "Day",
+        "time_period_week": "Week",
+        "time_period_month": "Month",
+        "loading_chart": "Loading chart...",
+        "no_data_available": "No data available",
+        "meal_type_label": "Meal Type",
+        "meal_description_label": "Description",
+
 
         // Features
         "why_choose": "Why Train with <span class='highlight'>WorkoutNote</span>?",
@@ -168,7 +182,31 @@ const TRANSLATIONS = {
         "validation.name.required": "Name is required",
         "validation.name.length": "Name must be between 2 and 100 characters",
         "validation.name.format": "Name can only contain letters, spaces, hyphens, and apostrophes",
-        "lbl_youtube_video": "YouTube Video"
+        "lbl_youtube_video": "YouTube Video",
+
+        // Nutrition
+        "title_nutrition": "Nutrition Tracking - WorkoutNote",
+        "nav_nutrition": "Nutrition",
+        "nav_dashboard": "Dashboard",
+        "nav_workout_log": "Log Workout",
+        "nutrition_title": "Nutrition Tracking",
+        "add_meal": "Add Meal",
+        "meal_breakfast": "Breakfast",
+        "meal_lunch": "Lunch",
+        "meal_dinner": "Dinner",
+        "meal_snack": "Snack",
+        "meal_description_placeholder": "e.g., 2 eggs, whole wheat toast, orange juice",
+        "analyze_with_ai": "Analyze with AI",
+        "analyzing": "Analyzing...",
+        "calories": "Calories",
+        "protein": "Protein",
+        "carbs": "Carbs",
+        "fat": "Fat",
+        "save_meal": "Save Meal",
+        "todays_meals": "Today's Meals",
+        "no_meals_today": "No meals logged today",
+        "meal_description_required": "Please describe your meal",
+        "confirm_delete_meal": "Delete this meal?"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -198,6 +236,20 @@ const TRANSLATIONS = {
         "stat_exercises": "Egzersiz",
         "stat_uptime": "Aktif Kullanıcı",
         "stat_response": "Takip Günü",
+        "muscle_group": "Kas Grubu",
+
+        // Nutrition Analytics
+        "nutrition_analytics": "Beslenme Analizi",
+        "nutrition_today": "Bugünkü Beslenme",
+        "today_btn": "Bugün",
+        "time_period_day": "Gün",
+        "time_period_week": "Hafta",
+        "time_period_month": "Ay",
+        "loading_chart": "Grafik yükleniyor...",
+        "no_data_available": "Veri yok",
+        "meal_type_label": "Öğün Tipi",
+        "meal_description_label": "Açıklama",
+
 
         // Features
         "why_choose": "Neden <span class='highlight'>WorkoutNote</span>?",
@@ -339,6 +391,30 @@ const TRANSLATIONS = {
         "validation.name.required": "İsim gereklidir",
         "validation.name.length": "İsim 2 ile 100 karakter arasında olmalıdır",
         "validation.name.format": "İsim sadece harf, boşluk, tire ve kesme işareti içerebilir",
-        "lbl_youtube_video": "YouTube Video"
+        "lbl_youtube_video": "YouTube Video",
+
+        // Nutrition
+        "title_nutrition": "Beslenme Takibi - WorkoutNote",
+        "nav_nutrition": "Beslenme",
+        "nav_dashboard": "Panel",
+        "nav_workout_log": "Antrenman Kaydı",
+        "nutrition_title": "Beslenme Takibi",
+        "add_meal": "Öğün Ekle",
+        "meal_breakfast": "Kahvaltı",
+        "meal_lunch": "Öğle Yemeği",
+        "meal_dinner": "Akşam Yemeği",
+        "meal_snack": "Atıştırma",
+        "meal_description_placeholder": "örn: 2 yumurta, tam buğday ekmeği, portakal suyu",
+        "analyze_with_ai": "Yapay Zeka ile Analiz Et",
+        "analyzing": "Analiz ediliyor...",
+        "calories": "Kalori",
+        "protein": "Protein",
+        "carbs": "Karbonhidrat",
+        "fat": "Yağ",
+        "save_meal": "Öğünü Kaydet",
+        "todays_meals": "Bugünkü Öğünler",
+        "no_meals_today": "Bugün eklenen öğün yok",
+        "meal_description_required": "Lütfen öğününüzü açıklayın",
+        "confirm_delete_meal": "Bu öğünü silinsin mi?"
     }
 };
