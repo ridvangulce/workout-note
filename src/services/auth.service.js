@@ -57,7 +57,7 @@ const login = async (userId, email, password) => {
     const accessToken = jwt.sign(
         { sub: user.id },
         process.env.JWT_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: "1h" }
     );
 
     const refreshToken = crypto.randomBytes(64).toString("hex");
@@ -89,7 +89,7 @@ const refresh = async (refreshToken) => {
     return jwt.sign(
         { sub: tokenRow.user_id },
         process.env.JWT_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: "1h" }
     );
 }
 

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title_nutrition">Nutrition Tracking - WorkoutNote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="translations.js"></script>
+    <script src="i18n.js"></script>
+    <script src="app.v2.js"></script>
+</head>
+
+<body class="dashboard-page">
+    <div class="background-glow"></div>
+
+    <nav class="navbar">
+        <a href="/" class="logo">Workout<span class="highlight">Note</span></a>
+        <div class="nav-links">
+            <a href="/dashboard" data-i18n="nav_dashboard">Dashboard</a>
+            <a href="/nutrition" class="active" data-i18n="nav_nutrition">Nutrition</a>
+            <button onclick="logout()" class="btn-link" data-i18n="nav_logout">Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <header class="dashboard-header" style="align-items: center;">
+            <h2 data-i18n="nutrition_title">🍽️ Nutrition Tracking</h2>
+
+            <!-- Date Picker -->
+            <div
+                style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--glass-border);">
+                <button onclick="changeDate(-1)" class="btn-icon" style="width: 32px; height: 32px;"
+                    title="Previous Day">
+                    ◀
+                </button>
+                <input type="date" id="dateSelector" class="input-field"
+                    style="width: 150px; padding: 0.5rem; text-align: center; border: none; background: transparent;"
+                    onchange="onDateChange()">
+                <button onclick="changeDate(1)" class="btn-icon" style="width: 32px; height: 32px;" title="Next Day">
+                    ▶
+                </button>
+                <button onclick="goToToday()" class="btn btn-sm btn-outline"
+                    style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" data-i18n="today_btn">
+                    Today
+                </button>
+            </div>
+        </header>
+
+        <!-- Daily Summary -->
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="calories">Calories</div>
+                <div class="stat-value"><span id="totalCalories">0</span> / <span id="targetCalories">--</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="protein">Protein</div>
+                <div class="stat-value"><span id="totalProtein">0</span>g / <span id="targetProtein">--</span>g</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="carbs">Carbs</div>
+                <div class="stat-value"><span id="totalCarbs">0</span>g / <span id="targetCarbs">--</span>g</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" data-i18n="fat">Fat</div>
+                <div class="stat-value"><span id="totalFat">0</span>g / <span id="targetFat">--</span>g</div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="routine-card" style="margin-bottom: 2rem;">
+            <h3>📊 <span data-i18n="nutrition_analytics">Nutrition Analytics</span></h3>
+
+            <!-- Time Period Selector -->
+            <div class="time-period-selector" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+                <button class="period-btn active" data-period="day" onclick="switchPeriod('day')">
+                    <span data-i18n="time_period_day">Day</span>
+                </button>
+                <button class="period-btn" data-period="week" onclick="switchPeriod('week')">
+                    <span data-i18n="time_period_week">Week</span>
+                </button>
+                <button class="period-btn" data-period="month" onclick="switchPeriod('month')">
+                    <span data-i18n="time_period_month">Month</span>
+                </button>
+            </div>
+
+            <!-- Chart Container -->
+            <div class="chart-container" style="position: relative; height: 300px;">
+                <canvas id="nutritionChart"></canvas>
+                <div id="chartLoading"
+                    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <p class="text-muted" data-i18n="loading_chart">Loading chart...</p>
+                </div>
+                <div id="chartEmpty"
+                    style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                    <p class="text-muted" data-i18n="no_data_available">No data available</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Meal Form -->
+        <div class="routine-card" style="margin-bottom: 2rem;">
+            <h3 data-i18n="add_meal">➕ Add Meal</h3>
+
+            <form id="addMealForm" style="margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" data-i18n="meal_type_label">Meal Type</label>
+                    <select id="mealType" class="custom-select input-field">
+                        <option value="breakfast">🌅 <span data-i18n="meal_breakfast">Breakfast</span></option>
+                        <option value="lunch">🍴 <span data-i18n="meal_lunch">Lunch</span></option>
+                        <option value="dinner">🌙 <span data-i18n="meal_dinner">Dinner</span></option>
+                        <option value="snack">🍎 <span data-i18n="meal_snack">Snack</span></option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" data-i18n="meal_description_label">Description</label>
+                    <textarea id="mealDescription" class="input-field enhanced-textarea"
+                        placeholder="e.g., 2 eggs, whole wheat toast, orange juice" rows="3"
+                        data-i18n-placeholder="meal_description_placeholder"></textarea>
+                </div>
+
+                <button type="button" onclick="analyzeMeal()" class="btn btn-outline"
+                    style="width: 100%; margin-bottom: 1rem;">
+                    🤖 <span data-i18n="analyze_with_ai">Analyze with AI</span>
+                </button>
+
+                <div id="analysisResults"
+                    style="display: none; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem;">
+                        <div>
+                            <label class="text-muted" data-i18n="calories">Calories</label>
+                            <input type="number" id="calories" class="input-field" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="text-muted" data-i18n="protein">Protein (g)</label>
+                            <input type="number" step="0.1" id="protein" class="input-field" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="text-muted" data-i18n="carbs">Carbs (g)</label>
+                            <input type="number" step="0.1" id="carbs" class="input-field" placeholder="0">
+                        </div>
+                        <div>
+                            <label class="text-muted" data-i18n="fat">Fat (g)</label>
+                            <input type="number" step="0.1" id="fat" class="input-field" placeholder="0">
+                        </div>
+                    </div>
+                    <p id="portionNote" class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;"></p>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="save_meal">Save
+                    Meal</button>
+            </form>
+        </div>
+
+        <!-- Today's Meals -->
+        <div>
+            <h3 style="margin-bottom: 1rem;" data-i18n="todays_meals">Today's Meals</h3>
+            <div id="mealsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date().toISOString().split('T')[0];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize date picker with current date
+            document.getElementById('dateSelector').value = currentDate;
+
+            // Load data
+            await loadDailySummary();
+            await loadMeals();
+
+            // Form submit
+            document.getElementById('addMealForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveMeal();
+            });
+        });
+
+        // Date navigation functions
+        function changeDate(days) {
+            const date = new Date(currentDate);
+            date.setDate(date.getDate() + days);
+            currentDate = date.toISOString().split('T')[0];
+            document.getElementById('dateSelector').value = currentDate;
+            reloadData();
+        }
+
+        function onDateChange() {
+            currentDate = document.getElementById('dateSelector').value;
+            reloadData();
+        }
+
+        function goToToday() {
+            currentDate = new Date().toISOString().split('T')[0];
+            document.getElementById('dateSelector').value = currentDate;
+            reloadData();
+        }
+
+        async function reloadData() {
+            await loadDailySummary();
+            await loadMeals();
+            if (chartPeriod === 'day') {
+                await loadChart();
+            }
+        }
+
+        async function analyzeMeal() {
+            const description = document.getElementById('mealDescription').value.trim();
+            if (!description) {
+                alert(I18N.t('meal_description_required'));
+                return;
+            }
+
+            const analyzeBtn = event.target;
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = '⏳ ' + I18N.t('analyzing');
+
+            try {
+                const language = I18N.getCurrentLanguage();
+                const res = await fetchWithAuth(`/api/integrations/analyze-meal?description=${encodeURIComponent(description)}&language=${language}`);
+
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Fill in the nutrition fields
+                    document.getElementById('calories').value = data.calories;
+                    document.getElementById('protein').value = data.protein;
+                    document.getElementById('carbs').value = data.carbs;
+                    document.getElementById('fat').value = data.fat;
+                    document.getElementById('portionNote').textContent = data.portionNote || '';
+
+                    // Show results
+                    document.getElementById('analysisResults').style.display = 'block';
+                } else {
+                    alert('AI analysis failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Analysis error:', error);
+                alert('Error analyzing meal');
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = '🤖 ' + I18N.t('analyze_with_ai');
+            }
+        }
+
+        async function saveMeal() {
+            const mealType = document.getElementById('mealType').value;
+            const description = document.getElementById('mealDescription').value.trim();
+            const calories = parseInt(document.getElementById('calories').value) || null;
+            const protein = parseFloat(document.getElementById('protein').value) || null;
+            const carbs = parseFloat(document.getElementById('carbs').value) || null;
+            const fat = parseFloat(document.getElementById('fat').value) || null;
+
+            if (!description) {
+                alert(I18N.t('meal_description_required'));
+                return;
+            }
+
+            try {
+                const res = await fetchWithAuth('/api/meals', {
+                    method: 'POST',
+                    body: {
+                        mealDate: currentDate,
+                        mealType,
+                        description,
+                        calories,
+                        protein,
+                        carbs,
+                        fat,
+                        isAiEstimated: true
+                    }
+                });
+
+                if (res.ok) {
+                    // Reset form
+                    document.getElementById('addMealForm').reset();
+                    document.getElementById('analysisResults').style.display = 'none';
+
+                    // Reload data
+                    await loadDailySummary();
+                    await loadMeals();
+                    await loadChart(); // Reload chart after adding meal
+                } else {
+                    alert('Failed to save meal');
+                }
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Error saving meal');
+            }
+        }
+
+        async function loadDailySummary() {
+            try {
+                const res = await fetchWithAuth(`/api/meals/summary?date=${currentDate}`);
+                if (res.ok) {
+                    const data = await res.json();
+
+                    // Update totals
+                    document.getElementById('totalCalories').textContent = Math.round(data.summary.total_calories || 0);
+                    document.getElementById('totalProtein').textContent = parseFloat(data.summary.total_protein || 0).toFixed(1);
+                    document.getElementById('totalCarbs').textContent = parseFloat(data.summary.total_carbs || 0).toFixed(1);
+                    document.getElementById('totalFat').textContent = parseFloat(data.summary.total_fat || 0).toFixed(1);
+
+                    // Update goals if available
+                    if (data.goals) {
+                        document.getElementById('targetCalories').textContent = data.goals.daily_calorie_target || '--';
+                        document.getElementById('targetProtein').textContent = data.goals.daily_protein_target || '--';
+                        document.getElementById('targetCarbs').textContent = data.goals.daily_carbs_target || '--';
+                        document.getElementById('targetFat').textContent = data.goals.daily_fat_target || '--';
+                    }
+                }
+            } catch (error) {
+                console.error('Load summary error:', error);
+            }
+        }
+
+        async function loadMeals() {
+            try {
+                const res = await fetchWithAuth(`/api/meals?startDate=${currentDate}&endDate=${currentDate}`);
+                if (res.ok) {
+                    const { meals } = await res.json();
+                    renderMeals(meals);
+                }
+            } catch (error) {
+                console.error('Load meals error:', error);
+            }
+        }
+
+        function renderMeals(meals) {
+            const container = document.getElementById('mealsContainer');
+
+            if (!meals || meals.length === 0) {
+                container.innerHTML = '<p class="text-muted" data-i18n="no_meals_today">No meals logged today</p>';
+                return;
+            }
+
+            const mealIcons = {
+                breakfast: '🌅',
+                lunch: '🍴',
+                dinner: '🌙',
+                snack: '🍎'
+            };
+
+            container.innerHTML = meals.map(meal => `
+                <div class="routine-card" style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span style="font-size: 1.5rem;">${mealIcons[meal.meal_type] || '🍽️'}</span>
+                                <strong style="text-transform: capitalize;">${meal.meal_type}</strong>
+                            </div>
+                            <p style="color: var(--text-muted); margin-bottom: 0.5rem;">${meal.description}</p>
+                            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--text-muted);">
+                                ${meal.calories ? `<span>🔥 ${meal.calories} kcal</span>` : ''}
+                                ${meal.protein ? `<span>🥩 ${meal.protein}g protein</span>` : ''}
+                                ${meal.carbs ? `<span>🍞 ${meal.carbs}g carbs</span>` : ''}
+                                ${meal.fat ? `<span>🧈 ${meal.fat}g fat</span>` : ''}
+                            </div>
+                        </div>
+                        <button onclick="deleteMeal(${meal.id})" class="btn btn-sm" style="background: rgba(220,38,38,0.2); color: #ef4444;">
+                            🗑️
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteMeal(id) {
+            if (!confirm(I18N.t('confirm_delete_meal'))) return;
+
+            try {
+                const res = await fetchWithAuth(`/api/meals/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    await loadDailySummary();
+                    await loadMeals();
+                    await loadChart(); // Reload chart after deleting meal
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+
+        // ===== CHART FUNCTIONALITY =====
+        let nutritionChart = null;
+        let currentPeriod = 'day';
+
+        async function initChart() {
+            await loadChart();
+        }
+
+        async function switchPeriod(period) {
+            currentPeriod = period;
+
+            // Update active button
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.period === period) {
+                    btn.classList.add('active');
+                }
+            });
+
+            await loadChart();
+        }
+
+        async function loadChart() {
+            const chartLoading = document.getElementById('chartLoading');
+            const chartEmpty = document.getElementById('chartEmpty');
+            const canvas = document.getElementById('nutritionChart');
+
+            // Show loading
+            chartLoading.style.display = 'block';
+            chartEmpty.style.display = 'none';
+            canvas.style.opacity = '0.3';
+
+            try {
+                const res = await fetchWithAuth(`/api/meals/analytics?period=${currentPeriod}&date=${currentDate}`);
+
+                if (res.ok) {
+                    const { data, period } = await res.json();
+
+                    if (!data || data.length === 0) {
+                        // Show empty state
+                        chartLoading.style.display = 'none';
+                        chartEmpty.style.display = 'block';
+                        canvas.style.opacity = '0.3';
+                        return;
+                    }
+
+                    chartLoading.style.display = 'none';
+                    chartEmpty.style.display = 'none';
+                    canvas.style.opacity = '1';
+
+                    renderChart(data, period);
+                } else {
+                    throw new Error('Failed to load analytics');
+                }
+            } catch (error) {
+                console.error('Chart load error:', error);
+                chartLoading.style.display = 'none';
+                chartEmpty.style.display = 'block';
+                canvas.style.opacity = '0.3';
+            }
+        }
+
+        function renderChart(data, period) {
+            const ctx = document.getElementById('nutritionChart').getContext('2d');
+
+            // Destroy previous chart
+            if (nutritionChart) {
+                nutritionChart.destroy();
+            }
+
+            // Prepare labels and datasets based on period
+            let labels, datasets;
+
+            if (period === 'day') {
+                // For day view, show meal types
+                labels = data.map(d => {
+                    const mealLabels = {
+                        breakfast: I18N.t('meal_breakfast') || 'Breakfast',
+                        lunch: I18N.t('meal_lunch') || 'Lunch',
+                        dinner: I18N.t('meal_dinner') || 'Dinner',
+                        snack: I18N.t('meal_snack') || 'Snack'
+                    };
+                    return mealLabels[d.label] || d.label;
+                });
+
+                datasets = [
+                    {
+                        label: I18N.t('calories') || 'Calories',
+                        data: data.map(d => parseFloat(d.calories) || 0),
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('protein') || 'Protein (g)',
+                        data: data.map(d => parseFloat(d.protein) || 0),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('carbs') || 'Carbs (g)',
+                        data: data.map(d => parseFloat(d.carbs) || 0),
+                        borderColor: 'rgb(251, 191, 36)',
+                        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('fat') || 'Fat (g)',
+                        data: data.map(d => parseFloat(d.fat) || 0),
+                        borderColor: 'rgb(168, 85, 247)',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ];
+            } else {
+                // For week/month view, show dates
+                labels = data.map(d => {
+                    const date = new Date(d.date);
+                    return date.toLocaleDateString(I18N.getCurrentLanguage() || 'en', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                });
+
+                datasets = [
+                    {
+                        label: I18N.t('calories') || 'Calories',
+                        data: data.map(d => parseFloat(d.calories) || 0),
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('protein') || 'Protein (g)',
+                        data: data.map(d => parseFloat(d.protein) || 0),
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('carbs') || 'Carbs (g)',
+                        data: data.map(d => parseFloat(d.carbs) || 0),
+                        borderColor: 'rgb(251, 191, 36)',
+                        backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: I18N.t('fat') || 'Fat (g)',
+                        data: data.map(d => parseFloat(d.fat) || 0),
+                        borderColor: 'rgb(168, 85, 247)',
+                        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ];
+            }
+
+            nutritionChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#a0aec0',
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    family: 'Outfit'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#a0aec0'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#a0aec0'
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // Initialize chart when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+        });
+    </script>
+</body>
+
+</html>

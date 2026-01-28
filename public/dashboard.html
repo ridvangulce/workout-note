@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="style.css">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <style>
         /* Select2 Dark Theme Overrides */
         .select2-container--default .select2-selection--multiple,
@@ -134,10 +137,30 @@
 
     <nav class="navbar">
         <a href="/" class="logo">Workout<span class="highlight">Note</span></a>
-        <div class="nav-links"></div>
+
+        <button class="hamburger-menu" aria-label="Toggle Navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="nav-links">
+            <a href="/dashboard" class="active" data-i18n="nav_dashboard">Dashboard</a>
+            <a href="#" onclick="switchView('nutrition'); return false;" data-i18n="nav_nutrition">Nutrition</a>
+            <a href="/workout-log" data-i18n="nav_workout_log">Log Workout</a>
+            <button onclick="logout()" class="btn-link" data-i18n="nav_logout">Logout</button>
+        </div>
     </nav>
 
     <div class="dashboard-container">
+        <!-- Mobile Sidebar Toggle -->
+        <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">
+            ☰ <span data-i18n="menu">Menu</span>
+        </button>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
         <aside class="sidebar">
             <div class="user-profile">
                 <div class="avatar">
@@ -153,6 +176,7 @@
                 <li class="active"><a href="#" data-view="overview" data-i18n="nav_overview">Overview</a></li>
                 <li><a href="#" data-view="routines" data-i18n="nav_workouts">My Workouts</a></li>
                 <li><a href="#" data-view="exercises" data-i18n="nav_exercises">Exercises</a></li>
+                <li><a href="#" data-view="nutrition" data-i18n="nav_nutrition">Nutrition</a></li>
                 <li><a href="#" data-view="history" data-i18n="nav_history">History</a></li>
                 <li><a href="#" data-view="settings" data-i18n="nav_settings">Settings</a></li>
             </ul>
@@ -179,6 +203,20 @@
                         <div class="stat-details">
                             <h3 data-i18n="total_workouts">Total Workouts</h3>
                             <p class="stat-value" id="totalWorkouts">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="cursor: pointer;" onclick="switchView('nutrition')">
+                        <div class="stat-icon">🍽️</div>
+                        <div class="stat-details">
+                            <h3 data-i18n="nutrition_today">Today's Nutrition</h3>
+                            <p class="stat-value" id="overviewCalories" style="font-size: 1.2rem;">-- <span
+                                    style="font-size: 0.8rem; color: var(--text-muted);">kcal</span></p>
+                            <div
+                                style="display: flex; gap: 1rem; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                                <span>💪 <span id="overviewProtein">--</span>g</span>
+                                <span>🍞 <span id="overviewCarbs">--</span>g</span>
+                                <span>🧈 <span id="overviewFat">--</span>g</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -300,6 +338,69 @@
                         </form>
                     </div>
 
+                    <!-- Health Profile Card -->
+                    <div class="feature-card settings-card">
+                        <h3 data-i18n="settings_health_profile">Health Profile</h3>
+                        <form id="settingsHealthProfileForm">
+                            <div class="form-group">
+                                <div style="display: flex; gap: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label data-i18n="gender">Gender</label>
+                                        <select id="settingsGender" class="input-field custom-select">
+                                            <option value="male" data-i18n="male">Male</option>
+                                            <option value="female" data-i18n="female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label data-i18n="activity_level">Activity Level</label>
+                                        <select id="settingsActivity" class="input-field custom-select">
+                                            <option value="sedentary" data-i18n="sedentary">Sedentary</option>
+                                            <option value="light" data-i18n="light">Lightly Active</option>
+                                            <option value="moderate" data-i18n="moderate">Moderately Active</option>
+                                            <option value="active" data-i18n="active">Active</option>
+                                            <option value="very_active" data-i18n="very_active">Very Active</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div style="display: flex; gap: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label data-i18n="height">Height (cm)</label>
+                                        <input type="number" id="settingsHeight" class="input-field">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label data-i18n="weight">Weight (kg)</label>
+                                        <input type="number" id="settingsWeight" class="input-field">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label data-i18n="age">Age</label>
+                                        <input type="number" id="settingsAge" class="input-field">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div style="display: flex; gap: 1rem;">
+                                    <div style="flex: 1;">
+                                        <label data-i18n="target_weight">Target Weight (kg)</label>
+                                        <input type="number" id="settingsTargetWeight" class="input-field">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label data-i18n="goal">Goal</label>
+                                        <select id="settingsGoal" class="input-field custom-select">
+                                            <option value="lose" data-i18n="lose_weight">Lose Weight</option>
+                                            <option value="maintain" data-i18n="maintain_weight">Maintain Weight
+                                            </option>
+                                            <option value="gain" data-i18n="gain_muscle">Gain Muscle</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" data-i18n="calculate_goals">Update &
+                                Recalculate</button>
+                        </form>
+                    </div>
+
                     <!-- Security Card -->
                     <div class="feature-card settings-card">
                         <h3 data-i18n="settings_security">Security</h3>
@@ -316,6 +417,208 @@
                                 Password</button>
                         </form>
                     </div>
+                </div>
+            </div>
+
+            <!-- Nutrition View -->
+            <div id="nutrition-view" class="view-section" style="display: none;">
+                <header class="dashboard-header" style="align-items: center;">
+                    <h2 data-i18n="nutrition_title">🍽️ Nutrition Tracking</h2>
+
+                    <!-- Date Picker -->
+                    <!-- Date Range Picker -->
+                    <div class="date-range-picker"
+                        style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.05); padding: 0.5rem; border-radius: 10px; border: 1px solid var(--glass-border); flex-wrap: wrap;">
+                        <input type="text" id="nutritionStartDate" class="input-field"
+                            style="width: 130px; padding: 0.4rem; font-size: 0.9rem;" title="Start Date">
+                        <span style="color: var(--text-muted);">-</span>
+                        <input type="text" id="nutritionEndDate" class="input-field"
+                            style="width: 130px; padding: 0.4rem; font-size: 0.9rem;" title="End Date">
+                        <button onclick="reloadNutritionData()" class="btn btn-sm btn-primary"
+                            style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" data-i18n="filter_btn">
+                            Filter
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Progress Bars Section -->
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                    <!-- Calories -->
+                    <div class="stat-card" style="display: block;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <div class="stat-label" data-i18n="calories">Calories</div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">
+                                <span id="caloriesRemaining">--</span> <span
+                                    style="font-size: 0.8rem; color: var(--text-muted);" id="caloriesStatus"></span>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container"
+                            style="background: rgba(255,255,255,0.1); border-radius: 6px; height: 10px; width: 100%; overflow: hidden;">
+                            <div id="caloriesProgress"
+                                style="width: 0%; height: 100%; background: var(--primary-color); border-radius: 6px; transition: width 0.5s ease, background 0.3s;">
+                            </div>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; margin-top: 0.3rem; font-size: 0.8rem; color: var(--text-muted);">
+                            <span><span id="totalCalories">0</span> <span data-i18n="unit_kcal">kcal</span></span>
+                            <span><span data-i18n="target_label">Target:</span> <span
+                                    id="targetCalories">--</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Macros Container -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                        <!-- Protein -->
+                        <div class="stat-card" style="display: block; padding: 1rem;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;"
+                                data-i18n="protein">Protein</div>
+                            <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                <span id="proteinLeft">--</span><span data-i18n="unit_g">g</span>
+                                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);"
+                                    id="proteinStatus"></span>
+                            </div>
+                            <div
+                                style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; width: 100%;">
+                                <div id="proteinProgress"
+                                    style="width: 0%; height: 100%; background: #3b82f6; border-radius: 4px; transition: width 0.5s;">
+                                </div>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem;">
+                                <span id="totalProtein">0</span> / <span id="targetProtein">--</span><span
+                                    data-i18n="unit_g">g</span>
+                            </div>
+                        </div>
+
+                        <!-- Carbs -->
+                        <div class="stat-card" style="display: block; padding: 1rem;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;"
+                                data-i18n="carbs">Carbs</div>
+                            <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                <span id="carbsLeft">--</span><span data-i18n="unit_g">g</span>
+                                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);"
+                                    id="carbsStatus"></span>
+                            </div>
+                            <div
+                                style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; width: 100%;">
+                                <div id="carbsProgress"
+                                    style="width: 0%; height: 100%; background: #f59e0b; border-radius: 4px; transition: width 0.5s;">
+                                </div>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem;">
+                                <span id="totalCarbs">0</span> / <span id="targetCarbs">--</span><span
+                                    data-i18n="unit_g">g</span>
+                            </div>
+                        </div>
+
+                        <!-- Fat -->
+                        <div class="stat-card" style="display: block; padding: 1rem;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;"
+                                data-i18n="fat">Fat</div>
+                            <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                                <span id="fatLeft">--</span><span data-i18n="unit_g">g</span>
+                                <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);"
+                                    id="fatStatus"></span>
+                            </div>
+                            <div
+                                style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; width: 100%;">
+                                <div id="fatProgress"
+                                    style="width: 0%; height: 100%; background: #a855f7; border-radius: 4px; transition: width 0.5s;">
+                                </div>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem;">
+                                <span id="totalFat">0</span> / <span id="targetFat">--</span><span
+                                    data-i18n="unit_g">g</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div class="routine-card" style="margin-bottom: 2rem;">
+                    <h3>📊 <span data-i18n="nutrition_analytics">Nutrition Analytics</span></h3>
+
+
+                    <!-- Chart Container -->
+                    <div class="chart-container" style="position: relative; height: 300px;">
+                        <canvas id="nutritionChart"></canvas>
+                        <div id="chartLoading"
+                            style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <p class="text-muted" data-i18n="loading_chart">Loading chart...</p>
+                        </div>
+                        <div id="chartEmpty"
+                            style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                            <p class="text-muted" data-i18n="no_data_available">No data available</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Meal Form -->
+                <div class="routine-card" style="margin-bottom: 2rem;">
+                    <h3 data-i18n="add_meal">➕ Add Meal</h3>
+
+                    <form id="addMealForm" style="margin-top: 1rem;">
+                        <div class="form-group" style="display: flex; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <label class="form-label" data-i18n="date">Date</label>
+                                <input type="text" id="mealDate" class="input-field" placeholder="Select date">
+                            </div>
+                            <div style="flex: 1;">
+                                <label class="form-label" data-i18n="meal_type_label">Meal Type</label>
+                                <select id="mealType" class="input-field custom-select">
+                                    <option value="breakfast">🌅 <span data-i18n="meal_breakfast">Breakfast</span>
+                                    </option>
+                                    <option value="lunch">🍴 <span data-i18n="meal_lunch">Lunch</span></option>
+                                    <option value="dinner">🌙 <span data-i18n="meal_dinner">Dinner</span></option>
+                                    <option value="snack">🍎 <span data-i18n="meal_snack">Snack</span></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <label class="form-label" data-i18n="meal_description_label">Description</label>
+                            <textarea id="mealDescription" class="input-field enhanced-textarea"
+                                placeholder="e.g., 2 eggs, whole wheat toast, orange juice" rows="3"
+                                data-i18n-placeholder="meal_description_placeholder"></textarea>
+                        </div>
+
+                        <button type="button" onclick="analyzeMeal()" class="btn btn-outline"
+                            style="width: 100%; margin-bottom: 1rem;">
+                            🤖 <span data-i18n="analyze_with_ai">Analyze with AI</span>
+                        </button>
+
+                        <div id="analysisResults"
+                            style="display: none; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                            <div
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem;">
+                                <div>
+                                    <label class="text-muted" data-i18n="calories">Calories</label>
+                                    <input type="number" id="calories" class="input-field" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-muted" data-i18n="protein">Protein (g)</label>
+                                    <input type="number" step="0.1" id="protein" class="input-field" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-muted" data-i18n="carbs">Carbs (g)</label>
+                                    <input type="number" step="0.1" id="carbs" class="input-field" placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="text-muted" data-i18n="fat">Fat (g)</label>
+                                    <input type="number" step="0.1" id="fat" class="input-field" placeholder="0">
+                                </div>
+                            </div>
+                            <p id="portionNote" class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;"></p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="save_meal">Save
+                            Meal</button>
+                    </form>
+                </div>
+
+                <!-- Today's Meals -->
+                <div>
+                    <h3 style="margin-bottom: 1rem;" data-i18n="todays_meals">Today's Meals</h3>
+                    <div id="mealsContainer"></div>
                 </div>
             </div>
         </main>
@@ -372,6 +675,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Add Exercise Modal -->
     <div id="addExerciseModal" class="modal">
@@ -444,13 +748,78 @@
         </div>
     </div>
 
+    <!-- Onboarding Profile Modal -->
+    <div id="onboardingModal" class="modal" style="z-index: 10001;">
+        <div class="modal-content" style="max-width: 500px;">
+            <h2 style="text-align: center; margin-bottom: 0.5rem;" data-i18n="onboarding_title">Let's Get Started!</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;"
+                data-i18n="onboarding_subtitle">
+                Tell us about yourself to get personalized calorie & macro goals.
+            </p>
+            <form id="onboardingForm">
+                <div class="form-group">
+                    <label data-i18n="gender">Gender</label>
+                    <select id="profileGender" required class="input-field"
+                        style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-color);">
+                        <option value="male" data-i18n="male">Male</option>
+                        <option value="female" data-i18n="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-row" style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label data-i18n="height">Height (cm)</label>
+                        <input type="number" id="profileHeight" required placeholder="175" class="input-field">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label data-i18n="weight">Weight (kg)</label>
+                        <input type="number" id="profileWeight" required placeholder="70" class="input-field">
+                    </div>
+                </div>
+                <div class="form-row" style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label data-i18n="age">Age</label>
+                        <input type="number" id="profileAge" required placeholder="25" class="input-field">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label data-i18n="target_weight">Target Weight (kg)</label>
+                        <input type="number" id="profileTargetWeight" required placeholder="75" class="input-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="activity_level">Activity Level</label>
+                    <select id="profileActivity" required class="input-field"
+                        style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-color);">
+                        <option value="sedentary" data-i18n="sedentary">Sedentary (Office job)</option>
+                        <option value="light" data-i18n="light">Lightly Active (1-3 days/week)</option>
+                        <option value="moderate" data-i18n="moderate">Moderately Active (3-5 days/week)</option>
+                        <option value="active" data-i18n="active">Active (6-7 days/week)</option>
+                        <option value="very_active" data-i18n="very_active">Very Active (Physical job)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="goal">Goal</label>
+                    <select id="profileGoal" required class="input-field"
+                        style="width: 100%; padding: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: var(--text-color);">
+                        <option value="lose" data-i18n="lose_weight">Lose Weight</option>
+                        <option value="maintain" data-i18n="maintain_weight" selected>Maintain Weight</option>
+                        <option value="gain" data-i18n="gain_muscle">Gain Muscle</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1.5rem;"
+                    data-i18n="calculate_goals">Calculate & Save</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Core Dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="translations.js"></script>
     <script src="i18n.js"></script>
     <script src="body-map.js"></script>
     <script src="app.v2.js"></script>
+    <script src="nutrition.js"></script>
 </body>
 
 </html>

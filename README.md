@@ -12,23 +12,25 @@
 
 ### Key Features
 *   **Intuitive Workout Logging:** Effortlessly log your sets, reps, and weights with a human-centric interface.
+*   **AI-Powered Nutrition Tracking:** Analyze your meals with Google Gemini AI. Just describe your meal (e.g., "2 eggs and toast"), and get instant, accurate nutritional breakdowns (calories, protein, carbs, fat).
+*   **Smart Meal Analysis:** Includes a consistency engine (Zero-Temperature AI) to ensure identical inputs always yield consistent results using standard nutritional databases.
+*   **Advanced Analytics:**
+    *   **Workout:** Track volume and sets over time.
+    *   **Nutrition:** Visualize daily, weekly, and custom date range intake with interactive charts.
 *   **Interactive Body Map:** Visualize muscle engagement and filter exercises using an interactive anatomical SVG map.
-*   **Progress Analytics:** Track your volume and sets over time with built-in charts and history.
+*   **Mobile-First Design:** Fully responsive UI with specific enhancements for mobile users (hamburger menu, stacked layouts, slide-out dashboards).
 *   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content and validation messages.
-*   **Smart Routines:** Create and manage personalized workout routines for efficient training sessions.
-*   **Password Management:** Secure password reset flow via email with time-limited tokens.
-*   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication and comprehensive input validation.
-*   **Rate Limiting:** Built-in protection against brute force attacks with intelligent rate limiting.
-*   **Input Validation:** Comprehensive validation rules with localized error messages for better user experience.
+*   **Smart Routines:** Create and manage personalized workout routines.
+*   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication.
 
 ### Technology Stack
-*   **Frontend:** Vanilla JS, CSS3, Semantic HTML5
+*   **Frontend:** Vanilla JS, CSS3 (Custom Properties), Semantic HTML5
 *   **Backend:** Node.js & Express
+*   **AI Integration:** Google Gemini API (Flash 2.0 Model)
 *   **Database:** PostgreSQL (with Supabase support)
 *   **Authentication:** JWT (JSON Web Tokens) with Cookie support
 *   **Visualization:** Chart.js, Interactive SVG Map
-*   **Validation:** Express-validator with i18n support
-*   **Security:** Rate limiting, input sanitization, XSS protection
+*   **UI Components:** Flatpickr (Date Ranges), Custom Modals
 
 ### Installation
 
@@ -49,6 +51,7 @@
     PORT=8080
     DATABASE_URL=postgresql://user:password@host:port/database
     JWT_SECRET=your_secret_key
+    GEMINI_API_KEY=your_google_gemini_api_key
 
     # Email Configuration (Required for Password Reset)
     EMAIL_USER=your-email@gmail.com
@@ -120,23 +123,25 @@ npm run test:coverage    # Coverage report
 
 ### Temel Özellikler
 *   **Sezgisel Antrenman Kaydı:** Setlerinizi, tekrarlarınızı ve ağırlıklarınızı insan odaklı bir arayüzle zahmetsizce kaydedin.
+*   **Yapay Zeka Destekli Beslenme Takibi:** Öğünlerinizi Google Gemini AI ile analiz edin. Sadece yemeğinizi tanımlayın (örn: "2 yumurta ve tost"), anında ve doğru besin değerlerini (kalori, protein, karbonhidrat, yağ) alın.
+*   **Akıllı Öğün Analizi:** Standart besin veritabanlarını kullanarak aynı girdilerin her zaman tutarlı sonuçlar vermesini sağlayan bir tutarlılık motoru (Sıfır Hata Payı AI) içerir.
+*   **Gelişmiş Analizler:**
+    *   **Antrenman:** Hacim ve set sayınızı zaman içinde takip edin.
+    *   **Beslenme:** Etkileşimli grafiklerle günlük, haftalık ve özel tarih aralığındaki alımınızı görselleştirin.
 *   **Etkileşimli Vücut Haritası:** Etkileşimli anatomik SVG haritası ile kas katılımını görselleştirin ve egzersizleri filtreleyin.
-*   **Gelişim Analizi:** Dahili grafikler ve geçmişle hacim ve set sayınızı zaman içinde takip edin.
+*   **Mobil Öncelikli Tasarım:** Mobil kullanıcılar için özel iyileştirmeler (hamburger menü, dikey yerleşimler, kayan paneller) içeren tam duyarlı arayüz.
 *   **Çoklu Dil Desteği:** Dinamik içerik ve doğrulama mesajları dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
-*   **Akıllı Rutinler:** Verimli antrenman seansları için kişiselleştirilmiş rutinler oluşturun ve yönetin.
-*   **Şifre Yönetimi:** E-posta yoluyla güvenli, süreli tokenlar ile şifre sıfırlama akışı.
-*   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ve kapsamlı girdi doğrulama ile kişisel kullanıcı profilleri.
-*   **Hız Sınırlama:** Akıllı hız sınırlama ile kaba kuvvet saldırılarına karşı yerleşik koruma.
-*   **Girdi Doğrulama:** Daha iyi kullanıcı deneyimi için yerelleştirilmiş hata mesajlarıyla kapsamlı doğrulama kuralları.
+*   **Akıllı Rutinler:** Kişiselleştirilmiş antrenman rutinleri oluşturun ve yönetin.
+*   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ile kişisel kullanıcı profilleri.
 
 ### Teknoloji Yığını
-*   **Frontend:** Vanilla JS, CSS3, Semantik HTML5
+*   **Frontend:** Vanilla JS, CSS3 (Custom Properties), Semantik HTML5
 *   **Backend:** Node.js & Express
+*   **Yapay Zeka Entegrasyonu:** Google Gemini API (Flash 2.0 Model)
 *   **Database:** PostgreSQL (Supabase desteği ile)
 *   **Kimlik Doğrulama:** JWT (JSON Web Tokens), Çerez desteği ile
 *   **Görselleştirme:** Chart.js, Etkileşimli SVG Haritası
-*   **Doğrulama:** Express-validator ile i18n desteği
-*   **Güvenlik:** Hız sınırlama, girdi temizleme, XSS koruması
+*   **Arayüz Bileşenleri:** Flatpickr (Tarih Aralıkları), Özel Modallar
 
 ### Kurulum
 
@@ -157,6 +162,7 @@ npm run test:coverage    # Coverage report
     PORT=8080
     DATABASE_URL=postgresql://kullanici:sifre@host:port/veritabani
     JWT_SECRET=gizli_anahtariniz
+    GEMINI_API_KEY=google_gemini_api_anahtariniz
 
     # E-posta Yapılandırması (Şifre Sıfırlama için Gerekli)
     EMAIL_USER=eposta@gmail.com

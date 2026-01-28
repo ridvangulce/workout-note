@@ -47,9 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Navigation & Interaction
     document.querySelectorAll('.sidebar-menu a').forEach(link => {
         link.addEventListener('click', (e) => {
+            const targetLink = e.target.closest('a');
+            const view = targetLink.dataset.view;
+
+            // Allow links without data-view (external pages like /nutrition) to navigate normally
+            if (!view) {
+                return; // Let browser handle the navigation
+            }
+
+            // Handle SPA view switching for dashboard
             e.preventDefault();
-            const view = e.target.closest('a').dataset.view;
-            if (view && window.switchView) window.switchView(view);
+            if (window.switchView) window.switchView(view);
         });
     });
 
@@ -161,9 +169,86 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingsPasswordForm) {
         settingsPasswordForm.addEventListener('submit', handleUpdatePassword);
     }
+    const settingsHealthProfileForm = document.getElementById('settingsHealthProfileForm');
+    if (settingsHealthProfileForm) {
+        settingsHealthProfileForm.addEventListener('submit', handleUpdateHealthProfile);
+    }
 
     setupVideoSearch();
+    setupMobileNavigation();
 });
+
+function setupMobileNavigation() {
+    // 1. Hamburger Menu Config
+    const hamburger = document.querySelector('.hamburger-menu');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a link
+        navLinks.querySelectorAll('a, button').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+
+    // 2. Sidebar Mobile Config
+    const sidebarToggle = document.getElementById('mobileSidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add('active');
+        if (overlay) overlay.classList.add('active');
+    }
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains('active')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar when clicking a menu item
+    if (sidebar) {
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Determine if we are on mobile (simple width check or just always close)
+                if (window.innerWidth <= 968) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
+}
 
 // --- Settings Handlers ---
 
@@ -547,6 +632,30 @@ async function updateDashboardUI() {
             }
         }
     } catch (e) { console.error(e); }
+
+    // 4. Fetch Nutrition Summary for Overview
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetchWithAuth(`/api/meals/summary?date=${today}`);
+        if (res.ok) {
+            const data = await res.json();
+            const summary = data.summary || {};
+
+            // Update overview nutrition card
+            const overviewCalories = document.getElementById('overviewCalories');
+            const overviewProtein = document.getElementById('overviewProtein');
+            const overviewCarbs = document.getElementById('overviewCarbs');
+            const overviewFat = document.getElementById('overviewFat');
+
+            if (overviewCalories) {
+                const calories = Math.round(summary.total_calories || 0);
+                overviewCalories.innerHTML = `${calories} <span style="font-size: 0.8rem; color: var(--text-muted);">kcal</span>`;
+            }
+            if (overviewProtein) overviewProtein.textContent = Math.round(summary.total_protein || 0);
+            if (overviewCarbs) overviewCarbs.textContent = Math.round(summary.total_carbs || 0);
+            if (overviewFat) overviewFat.textContent = Math.round(summary.total_fat || 0);
+        }
+    } catch (e) { console.error('Nutrition summary load error:', e); }
 }
 
 // --- Global Functions ---
@@ -566,6 +675,14 @@ window.switchView = function (viewName) {
         if (el.dataset.view === viewName) el.parentElement.classList.add('active');
         else el.parentElement.classList.remove('active');
     });
+
+    // Initialize views when switched
+    if (viewName === 'nutrition' && typeof initNutritionView === 'function') {
+        initNutritionView();
+    }
+    if (viewName === 'settings') {
+        loadSettingsProfile();
+    }
 }
 
 window.openModal = function (modalId) {
@@ -1208,3 +1325,62 @@ document.addEventListener('DOMContentLoaded', () => {
         resetPasswordForm.addEventListener('submit', handleResetPassword);
     }
 });
+
+// --- Health Profile Handlers ---
+
+async function handleUpdateHealthProfile(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    setLoading(btn, true);
+
+    const profileData = {
+        gender: document.getElementById('settingsGender').value,
+        height: parseInt(document.getElementById('settingsHeight').value),
+        weight: parseFloat(document.getElementById('settingsWeight').value),
+        age: parseInt(document.getElementById('settingsAge').value),
+        targetWeight: parseFloat(document.getElementById('settingsTargetWeight').value),
+        activityLevel: document.getElementById('settingsActivity').value,
+        goalType: document.getElementById('settingsGoal').value
+    };
+
+    try {
+        const res = await fetchWithAuth('/api/meals/profile', {
+            method: 'POST',
+            body: profileData
+        });
+
+        if (res.ok) {
+            showMessage('success', I18N.t('profile_updated_success'));
+            // Refresh goals display if needed
+            updateDashboardUI();
+        } else {
+            showMessage('error', I18N.t('error_generic'));
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('error', I18N.t('error_generic'));
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+async function loadSettingsProfile() {
+    try {
+        // We reuse the summary endpoint which returns goals/profile
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetchWithAuth(`/api/meals/summary?date=${today}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.goals) {
+                const g = data.goals;
+                if (g.gender) document.getElementById('settingsGender').value = g.gender;
+                if (g.height) document.getElementById('settingsHeight').value = g.height;
+                if (g.weight) document.getElementById('settingsWeight').value = g.weight;
+                if (g.age) document.getElementById('settingsAge').value = g.age;
+                if (g.target_weight) document.getElementById('settingsTargetWeight').value = g.target_weight;
+                if (g.activity_level) document.getElementById('settingsActivity').value = g.activity_level;
+                if (g.goal_type) document.getElementById('settingsGoal').value = g.goal_type;
+            }
+        }
+    } catch (e) { console.error(e); }
+}
