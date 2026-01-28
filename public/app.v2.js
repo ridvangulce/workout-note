@@ -169,6 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (settingsPasswordForm) {
         settingsPasswordForm.addEventListener('submit', handleUpdatePassword);
     }
+    const settingsHealthProfileForm = document.getElementById('settingsHealthProfileForm');
+    if (settingsHealthProfileForm) {
+        settingsHealthProfileForm.addEventListener('submit', handleUpdateHealthProfile);
+    }
 
     setupVideoSearch();
     setupMobileNavigation();
@@ -675,6 +679,9 @@ window.switchView = function (viewName) {
     // Initialize views when switched
     if (viewName === 'nutrition' && typeof initNutritionView === 'function') {
         initNutritionView();
+    }
+    if (viewName === 'settings') {
+        loadSettingsProfile();
     }
 }
 
@@ -1318,3 +1325,62 @@ document.addEventListener('DOMContentLoaded', () => {
         resetPasswordForm.addEventListener('submit', handleResetPassword);
     }
 });
+
+// --- Health Profile Handlers ---
+
+async function handleUpdateHealthProfile(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    setLoading(btn, true);
+
+    const profileData = {
+        gender: document.getElementById('settingsGender').value,
+        height: parseInt(document.getElementById('settingsHeight').value),
+        weight: parseFloat(document.getElementById('settingsWeight').value),
+        age: parseInt(document.getElementById('settingsAge').value),
+        targetWeight: parseFloat(document.getElementById('settingsTargetWeight').value),
+        activityLevel: document.getElementById('settingsActivity').value,
+        goalType: document.getElementById('settingsGoal').value
+    };
+
+    try {
+        const res = await fetchWithAuth('/api/meals/profile', {
+            method: 'POST',
+            body: profileData
+        });
+
+        if (res.ok) {
+            showMessage('success', I18N.t('profile_updated_success'));
+            // Refresh goals display if needed
+            updateDashboardUI();
+        } else {
+            showMessage('error', I18N.t('error_generic'));
+        }
+    } catch (err) {
+        console.error(err);
+        showMessage('error', I18N.t('error_generic'));
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+async function loadSettingsProfile() {
+    try {
+        // We reuse the summary endpoint which returns goals/profile
+        const today = new Date().toISOString().split('T')[0];
+        const res = await fetchWithAuth(`/api/meals/summary?date=${today}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.goals) {
+                const g = data.goals;
+                if (g.gender) document.getElementById('settingsGender').value = g.gender;
+                if (g.height) document.getElementById('settingsHeight').value = g.height;
+                if (g.weight) document.getElementById('settingsWeight').value = g.weight;
+                if (g.age) document.getElementById('settingsAge').value = g.age;
+                if (g.target_weight) document.getElementById('settingsTargetWeight').value = g.target_weight;
+                if (g.activity_level) document.getElementById('settingsActivity').value = g.activity_level;
+                if (g.goal_type) document.getElementById('settingsGoal').value = g.goal_type;
+            }
+        }
+    } catch (e) { console.error(e); }
+}

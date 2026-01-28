@@ -1,10 +1,8 @@
 // Nutrition View Functions
-// Nutrition View Functions
 let nutritionStartDate = new Date().toISOString().split('T')[0];
 let nutritionEndDate = new Date().toISOString().split('T')[0];
 let nutritionChartInstance = null;
 
-// Initialize nutrition view when switched
 // Initialize nutrition view when switched
 function initNutritionView() {
     // Initialize date pickers with Flatpickr
@@ -279,22 +277,136 @@ async function loadDailySummary() {
         if (res.ok) {
             const data = await res.json();
 
-            document.getElementById('totalCalories').textContent = Math.round(data.summary.total_calories || 0);
-            document.getElementById('totalProtein').textContent = parseFloat(data.summary.total_protein || 0).toFixed(1);
-            document.getElementById('totalCarbs').textContent = parseFloat(data.summary.total_carbs || 0).toFixed(1);
-            document.getElementById('totalFat').textContent = parseFloat(data.summary.total_fat || 0).toFixed(1);
+            const totalCals = Math.round(data.summary.total_calories || 0);
+            const totalProtein = Math.round(data.summary.total_protein || 0);
+            const totalCarbs = Math.round(data.summary.total_carbs || 0);
+            const totalFat = Math.round(data.summary.total_fat || 0);
+
+            // Update basic text
+            document.getElementById('totalCalories').textContent = totalCals;
+            document.getElementById('totalProtein').textContent = totalProtein;
+            document.getElementById('totalCarbs').textContent = totalCarbs;
+            document.getElementById('totalFat').textContent = totalFat;
 
             if (data.goals) {
-                document.getElementById('targetCalories').textContent = data.goals.daily_calorie_target || '--';
-                document.getElementById('targetProtein').textContent = data.goals.daily_protein_target || '--';
-                document.getElementById('targetCarbs').textContent = data.goals.daily_carbs_target || '--';
-                document.getElementById('targetFat').textContent = data.goals.daily_fat_target || '--';
+                const targetCals = data.goals.daily_calorie_target || 2000;
+                const targetProtein = data.goals.daily_protein_target || 150;
+                const targetCarbs = data.goals.daily_carbs_target || 200;
+                const targetFat = data.goals.daily_fat_target || 60;
+
+                // Set Targets
+                document.getElementById('targetCalories').textContent = targetCals;
+                document.getElementById('targetProtein').textContent = targetProtein;
+                document.getElementById('targetCarbs').textContent = targetCarbs;
+                document.getElementById('targetFat').textContent = targetFat;
+
+                // Calculate Remaining
+                const calLeft = targetCals - totalCals;
+                const proteinLeft = targetProtein - totalProtein;
+                const carbsLeft = targetCarbs - totalCarbs;
+                const fatLeft = targetFat - totalFat;
+
+                document.getElementById('caloriesRemaining').textContent = Math.abs(calLeft);
+                document.getElementById('caloriesStatus').textContent = calLeft >= 0 ? I18N.t('remaining') : I18N.t('over');
+                document.getElementById('caloriesStatus').style.color = calLeft >= 0 ? 'var(--text-muted)' : '#ef4444';
+
+                document.getElementById('proteinLeft').textContent = Math.abs(proteinLeft);
+                document.getElementById('proteinStatus').textContent = proteinLeft >= 0 ? I18N.t('remaining') : I18N.t('over');
+
+                document.getElementById('carbsLeft').textContent = Math.abs(carbsLeft);
+                document.getElementById('carbsStatus').textContent = carbsLeft >= 0 ? I18N.t('remaining') : I18N.t('over');
+
+                document.getElementById('fatLeft').textContent = Math.abs(fatLeft);
+                document.getElementById('fatStatus').textContent = fatLeft >= 0 ? I18N.t('remaining') : I18N.t('over');
+
+                // Update Progress Bars
+                updateProgressBar('caloriesProgress', totalCals, targetCals, '#00f260');
+                updateProgressBar('proteinProgress', totalProtein, targetProtein, '#3b82f6');
+                updateProgressBar('carbsProgress', totalCarbs, targetCarbs, '#f59e0b');
+                updateProgressBar('fatProgress', totalFat, targetFat, '#a855f7');
+
+            } else {
+                // Trigger onboarding if no goals
+                const onboardingModal = document.getElementById('onboardingModal');
+                if (onboardingModal) onboardingModal.style.display = 'block';
             }
         }
     } catch (error) {
         console.error('Load summary error:', error);
     }
 }
+
+function updateProgressBar(elementId, current, target, baseColor) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    let percentage = (current / target) * 100;
+    // Cap visual width at 100% (or let it stay full)
+    const visualWidth = Math.min(percentage, 100);
+
+    el.style.width = `${visualWidth}%`;
+
+    // Color Logic:
+    // If > 110% -> Red (Warning)
+    // If > 100% -> Orange/Red transition? 
+    // For now: Red if > target (over limit), Base color if under.
+    // Actually for macros like Protein, going over is sometimes good. 
+    // But for calories, usually bad. 
+    // Let's stick to simple: Turn Red if > 105%?
+
+    if (percentage > 100) {
+        el.style.backgroundColor = '#ef4444'; // Red warning
+    } else {
+        el.style.backgroundColor = baseColor;
+    }
+}
+
+// Handle Onboarding Form
+document.addEventListener('DOMContentLoaded', () => {
+    const onboardingForm = document.getElementById('onboardingForm');
+    if (onboardingForm) {
+        onboardingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = onboardingForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Calculating...';
+
+            const profileData = {
+                gender: document.getElementById('profileGender').value,
+                height: parseInt(document.getElementById('profileHeight').value),
+                weight: parseFloat(document.getElementById('profileWeight').value),
+                age: parseInt(document.getElementById('profileAge').value),
+                targetWeight: parseFloat(document.getElementById('profileTargetWeight').value),
+                activityLevel: document.getElementById('profileActivity').value,
+                goalType: document.getElementById('profileGoal').value
+            };
+
+            try {
+                const res = await fetchWithAuth('/api/meals/profile', {
+                    method: 'POST',
+                    body: profileData
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('onboardingModal').style.display = 'none';
+                    alert(I18N.t('goals_calculated_success') || 'Goals calculated successfully!');
+                    // Refresh data
+                    loadDailySummary();
+                } else {
+                    alert('Failed to save profile.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error processing request.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        });
+    }
+});
 
 async function loadMeals() {
     try {

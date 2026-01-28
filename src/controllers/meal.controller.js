@@ -233,6 +233,68 @@ const mealController = {
         } catch (error) {
             next(error);
         }
+    },
+    /**
+     * Update user profile and recalculate goals
+     */
+    async updateProfile(req, res, next) {
+        try {
+            const userId = req.user.id;
+            const { height, weight, gender, age, activityLevel, targetWeight, goalType } = req.body;
+
+            // Calculate Goals immediately (Mifflin-St Jeor Equation)
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            const activityMultipliers = {
+                'sedentary': 1.2,
+                'light': 1.375,
+                'moderate': 1.55,
+                'active': 1.725,
+                'very_active': 1.9
+            };
+
+            const multiplier = activityMultipliers[activityLevel] || 1.2;
+            const tdee = Math.round(bmr * multiplier);
+
+            let calorieAdjustment = 0;
+            if (goalType === 'lose') calorieAdjustment = -500;
+            else if (goalType === 'gain') calorieAdjustment = 500;
+
+            const dailyCalorieTarget = Math.max(1200, tdee + calorieAdjustment);
+
+            // Macro Split (Protein 2g/kg, Fat 1g/kg, Rest Carbs)
+            const dailyProteinTarget = Math.round(weight * 2.0); // 2g per kg
+            const dailyFatTarget = Math.round(weight * 1.0);     // 1g per kg
+
+            // 1g Protein = 4kcal, 1g Fat = 9kcal, 1g Carb = 4kcal
+            const caloriesFromProtein = dailyProteinTarget * 4;
+            const caloriesFromFat = dailyFatTarget * 9;
+            const remainingCalories = dailyCalorieTarget - (caloriesFromProtein + caloriesFromFat);
+            const dailyCarbsTarget = Math.max(0, Math.round(remainingCalories / 4));
+
+            const goals = await nutritionGoalRepository.upsert(userId, {
+                height,
+                weight,
+                gender,
+                age,
+                activityLevel,
+                targetWeight,
+                goalType,
+                dailyCalorieTarget,
+                dailyProteinTarget,
+                dailyCarbsTarget,
+                dailyFatTarget
+            });
+
+            res.json({ goals });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 
