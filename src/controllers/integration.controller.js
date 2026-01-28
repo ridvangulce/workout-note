@@ -36,4 +36,25 @@ const searchYoutube = async (req, res, next) => {
     }
 };
 
-module.exports = { searchYoutube };
+const analyzeMeal = async (req, res, next) => {
+    try {
+        const { description, language = 'en' } = req.query;
+
+        if (!description || description.trim().length === 0) {
+            return res.status(400).json({ error: 'Meal description is required' });
+        }
+
+        const geminiService = require('../services/gemini.service');
+        const nutritionData = await geminiService.analyzeMeal(description, language);
+
+        res.json(nutritionData);
+    } catch (error) {
+        console.error('Analyze meal error:', error);
+        res.status(500).json({ error: 'Failed to analyze meal', details: error.message });
+    }
+};
+
+module.exports = {
+    searchYoutube,
+    analyzeMeal
+};
