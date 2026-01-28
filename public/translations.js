@@ -28,6 +28,7 @@ const TRANSLATIONS = {
         "stat_uptime": "Active Users",
         "stat_response": "Tracked Days",
         "muscle_group": "Muscle Group",
+        "footer_credit": "Developed by Rıdvan Gülçe",
 
         // Nutrition Analytics
         "nutrition_analytics": "Nutrition Analytics",
@@ -270,6 +271,7 @@ const TRANSLATIONS = {
         "stat_uptime": "Aktif Kullanıcı",
         "stat_response": "Takip Günü",
         "muscle_group": "Kas Grubu",
+        "footer_credit": "Rıdvan Gülçe tarafından geliştirildi",
 
         // Nutrition Analytics
         "nutrition_analytics": "Beslenme Analizi",

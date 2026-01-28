@@ -24,6 +24,9 @@ body {
     color: var(--text-color);
     line-height: 1.6;
     overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Background Glow Effect */
@@ -383,10 +386,134 @@ code { font-family: inherit; }
 
 /* Footer */
 .footer {
-    padding: 3rem 5%;
-    text-align: center;
+    background: var(--card-bg); /* Slightly distinct background */
+    padding: 4rem 5% 2rem;
     color: var(--text-muted);
     border-top: 1px solid var(--glass-border);
+    margin-top: auto;
+    font-size: 0.9rem;
+}
+
+.developer-credit-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.developer-credit-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.footer-brand {
+    flex: 1;
+    min-width: 250px;
+}
+
+.footer-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.footer-text {
+    line-height: 1.6;
+    max-width: 300px;
+    margin-bottom: 1.5rem;
+}
+
+.footer-links-group {
+    display: flex;
+    gap: 4rem;
+    flex-wrap: wrap;
+}
+
+.footer-column h4 {
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+}
+
+.footer-column ul {
+    list-style: none;
+}
+
+.footer-column li {
+    margin-bottom: 0.8rem;
+}
+
+.footer-column a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-column a:hover {
+    color: var(--primary-color);
+}
+
+.footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between; /* Split Copyright and Credit */
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.developer-credit {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s;
+}
+
+.developer-credit:hover {
+    background: rgba(0, 242, 96, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* Mobile Footer Resp */
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .footer-links-group {
+        gap: 2rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 /* Responsive handled at bottom of file */
@@ -585,6 +712,8 @@ code { font-family: inherit; }
     flex: 1;
     margin-left: 250px; /* Sidebar width */
     padding: 2rem 3rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .dashboard-header {
