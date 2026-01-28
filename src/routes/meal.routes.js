@@ -17,5 +17,6 @@ router.delete('/:id', mealController.deleteMeal);
 
 // Nutrition goals
 router.post('/goals', mealController.setGoals);
+router.post('/profile', mealController.updateProfile);
 
 module.exports = router;

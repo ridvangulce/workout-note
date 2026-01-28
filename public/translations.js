@@ -150,6 +150,7 @@ const TRANSLATIONS = {
 
         // Settings
         "settings_profile": "Profile",
+        "settings_health_profile": "Health Profile",
         "settings_security": "Security",
         "btn_save_changes": "Save Changes",
         "btn_change_password": "Change Password",
@@ -207,7 +208,38 @@ const TRANSLATIONS = {
         "no_meals_today": "No meals logged today",
         "meal_description_required": "Please describe your meal",
         "confirm_delete_meal": "Delete this meal?",
-        "filter_btn": "Filter"
+        "filter_btn": "Filter",
+
+        // Onboarding
+        "onboarding_title": "Let's Get Started!",
+        "onboarding_subtitle": "Tell us about yourself to get personalized calorie & macro goals.",
+        "gender": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "age": "Age",
+        "target_weight": "Target Weight (kg)",
+        "activity_level": "Activity Level",
+        "sedentary": "Sedentary (Office job)",
+        "light": "Lightly Active (1-3 days/week)",
+        "moderate": "Moderately Active (3-5 days/week)",
+        "active": "Active (6-7 days/week)",
+        "very_active": "Very Active (Physical job)",
+        "goal": "Goal",
+        "lose_weight": "Lose Weight",
+        "maintain_weight": "Maintain Weight",
+        "gain_muscle": "Gain Muscle",
+        "calculate_goals": "Calculate & Save",
+        "maintain_weight": "Maintain Weight",
+        "gain_muscle": "Gain Muscle",
+        "calculate_goals": "Calculate & Save",
+        "goals_calculated_success": "Goals calculated successfully!",
+        "remaining": "left",
+        "over": "over",
+        "unit_kcal": "kcal",
+        "unit_g": "g",
+        "target_label": "Target:"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -360,6 +392,7 @@ const TRANSLATIONS = {
 
         // Settings
         "settings_profile": "Profil",
+        "settings_health_profile": "Sağlık Profili",
         "settings_security": "Güvenlik",
         "btn_save_changes": "Değişiklikleri Kaydet",
         "btn_change_password": "Şifreyi Değiştir",
@@ -417,6 +450,37 @@ const TRANSLATIONS = {
         "no_meals_today": "Bugün eklenen öğün yok",
         "meal_description_required": "Lütfen öğününüzü açıklayın",
         "confirm_delete_meal": "Bu öğünü silinsin mi?",
-        "filter_btn": "Filtrele"
+        "filter_btn": "Filtrele",
+
+        // Onboarding
+        "onboarding_title": "Hadi Başlayalım!",
+        "onboarding_subtitle": "Size özel kalori ve makro hedefleri için kendinizden bahsedin.",
+        "gender": "Cinsiyet",
+        "male": "Erkek",
+        "female": "Kadın",
+        "height": "Boy (cm)",
+        "weight": "Kilo (kg)",
+        "age": "Yaş",
+        "target_weight": "Hedef Kilo (kg)",
+        "activity_level": "Aktivite Seviyesi",
+        "sedentary": "Hareketsiz (Ofis işi)",
+        "light": "Hafif Aktif (1-3 gün/hafta)",
+        "moderate": "Orta Aktif (3-5 gün/hafta)",
+        "active": "Aktif (6-7 gün/hafta)",
+        "very_active": "Çok Aktif (Fiziksel iş)",
+        "goal": "Hedef",
+        "lose_weight": "Kilo Ver",
+        "maintain_weight": "Kiloyu Koru",
+        "gain_muscle": "Kas Yap",
+        "calculate_goals": "Hesapla ve Kaydet",
+        "maintain_weight": "Kiloyu Koru",
+        "gain_muscle": "Kas Yap",
+        "calculate_goals": "Hesapla ve Kaydet",
+        "goals_calculated_success": "Hedefler başarıyla hesaplandı!",
+        "remaining": "kaldı",
+        "over": "aştı",
+        "unit_kcal": "kcal",
+        "unit_g": "g",
+        "target_label": "Hedef:"
     }
 };
