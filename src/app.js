@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const logger = require("./middlewares/logger")
 const errorHandler = require("./middlewares/error")
@@ -15,6 +16,16 @@ const mealRoutes = require("./routes/meal.routes");
 const app = express();
 
 app.use(express.json());
+
+// CORS Configuration for Next.js frontend
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
+
 app.use(logger);
 
 // Enable trust proxy for Vercel/proxies

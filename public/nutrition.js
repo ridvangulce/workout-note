@@ -1,16 +1,35 @@
 // Nutrition View Functions
-let nutritionCurrentDate = new Date().toISOString().split('T')[0];
-let nutritionChartPeriod = 'day';
+// Nutrition View Functions
+let nutritionStartDate = new Date().toISOString().split('T')[0];
+let nutritionEndDate = new Date().toISOString().split('T')[0];
 let nutritionChartInstance = null;
 
 // Initialize nutrition view when switched
+// Initialize nutrition view when switched
 function initNutritionView() {
-    // Initialize date picker
-    document.getElementById('nutritionDateSelector').value = nutritionCurrentDate;
+    // Initialize date pickers with Flatpickr
+    if (typeof flatpickr !== 'undefined') {
+        const config = {
+            theme: "dark",
+            dateFormat: "Y-m-d",
+            disableMobile: false, // forcing native on mobile if desired, but user asked for modern lib
+            onChange: function (selectedDates, dateStr, instance) {
+                // Optional: Auto-reload on change if desired, or just wait for Filter btn
+            }
+        };
+        flatpickr("#nutritionStartDate", { ...config, defaultDate: nutritionStartDate });
+        flatpickr("#nutritionEndDate", { ...config, defaultDate: nutritionEndDate });
+        flatpickr("#mealDate", { ...config, defaultDate: new Date() });
+    } else {
+        // Fallback
+        document.getElementById('nutritionStartDate').value = nutritionStartDate;
+        document.getElementById('nutritionEndDate').value = nutritionEndDate;
+        document.getElementById('mealDate').value = new Date().toISOString().split('T')[0];
+    }
 
     loadDailySummary();
     loadMeals();
-    initNutritionChart();
+    loadNutritionChart();
 
     // Attach form submit handler
     const form = document.getElementById('addMealForm');
@@ -24,45 +43,20 @@ function initNutritionView() {
 }
 
 // Date navigation functions
-function changeNutritionDate(days) {
-    const date = new Date(nutritionCurrentDate);
-    date.setDate(date.getDate() + days);
-    nutritionCurrentDate = date.toISOString().split('T')[0];
-    document.getElementById('nutritionDateSelector').value = nutritionCurrentDate;
-    reloadNutritionData();
-}
-
-function onNutritionDateChange() {
-    nutritionCurrentDate = document.getElementById('nutritionDateSelector').value;
-    reloadNutritionData();
-}
-
-function goToNutritionToday() {
-    nutritionCurrentDate = new Date().toISOString().split('T')[0];
-    document.getElementById('nutritionDateSelector').value = nutritionCurrentDate;
-    reloadNutritionData();
-}
-
 async function reloadNutritionData() {
+    nutritionStartDate = document.getElementById('nutritionStartDate').value;
+    nutritionEndDate = document.getElementById('nutritionEndDate').value;
+
+    if (new Date(nutritionEndDate) < new Date(nutritionStartDate)) {
+        alert(I18N.t('error_date_range') || 'End date cannot be before start date');
+        return;
+    }
+
     await loadDailySummary();
     await loadMeals();
-    if (nutritionChartPeriod === 'day') {
-        await loadNutritionChart();
-    }
+    await loadNutritionChart();
 }
 
-// Chart functions
-function initNutritionChart() {
-    loadNutritionChart();
-}
-
-function switchNutritionPeriod(period) {
-    nutritionChartPeriod = period;
-    document.querySelectorAll('.period-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.period === period);
-    });
-    loadNutritionChart();
-}
 
 async function loadNutritionChart() {
     const chartCanvas = document.getElementById('nutritionChart');
@@ -75,11 +69,18 @@ async function loadNutritionChart() {
     chartCanvas.style.opacity = '0.3';
 
     try {
-        const res = await fetchWithAuth(`/api/meals/analytics?period=${nutritionChartPeriod}&date=${nutritionCurrentDate}`);
+        // Always request custom period logic from backend since we use date range
+        const res = await fetchWithAuth(`/api/meals/analytics?period=custom&date=${nutritionStartDate}&startDate=${nutritionStartDate}&endDate=${nutritionEndDate}`);
+
         if (res.ok) {
             const response = await res.json();
-            const data = response.data || []; // Extract data array from response object
-            renderNutritionChart(data, nutritionChartPeriod);
+            const data = response.data || [];
+
+            // Backend returns 'custom' period which means date-based labels usually,
+            // or 'day' if start==end. We use what backend tells us.
+            const effectivePeriod = response.period || 'custom';
+            renderNutritionChart(data, effectivePeriod);
+
             loadingEl.style.display = 'none';
             chartCanvas.style.opacity = '1';
             emptyEl.style.display = data.length === 0 ? 'block' : 'none';
@@ -107,6 +108,8 @@ function renderNutritionChart(data, period) {
     document.getElementById('chartEmpty').style.display = 'none';
 
     const labels = data.map(item => {
+        // If period is 'day', we show meal types. 
+        // For 'week', 'month', or 'custom' (range), we show dates.
         if (period === 'day') {
             const typeTranslations = {
                 'breakfast': I18N.t('meal_breakfast'),
@@ -116,7 +119,11 @@ function renderNutritionChart(data, period) {
             };
             return typeTranslations[item.label] || item.label;
         } else {
-            return new Date(item.label).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            // For custom/week/month, the item likely has 'date' property from backend
+            // or 'label' if it was legacy. The backend now returns 'date' for week/month/custom.
+            // Let's handle both.
+            const dateStr = item.date || item.label;
+            return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         }
     });
 
@@ -229,11 +236,18 @@ async function saveMeal() {
         return;
     }
 
+    const mealDate = document.getElementById('mealDate').value || new Date().toISOString().split('T')[0];
+
+    if (!description) {
+        alert(I18N.t('meal_description_required'));
+        return;
+    }
+
     try {
         const res = await fetchWithAuth('/api/meals', {
             method: 'POST',
             body: {
-                mealDate: nutritionCurrentDate,
+                mealDate,
                 mealType,
                 description,
                 calories,
@@ -261,7 +275,7 @@ async function saveMeal() {
 
 async function loadDailySummary() {
     try {
-        const res = await fetchWithAuth(`/api/meals/summary?date=${nutritionCurrentDate}`);
+        const res = await fetchWithAuth(`/api/meals/summary?startDate=${nutritionStartDate}&endDate=${nutritionEndDate}`);
         if (res.ok) {
             const data = await res.json();
 
@@ -284,7 +298,7 @@ async function loadDailySummary() {
 
 async function loadMeals() {
     try {
-        const res = await fetchWithAuth(`/api/meals?startDate=${nutritionCurrentDate}&endDate=${nutritionCurrentDate}`);
+        const res = await fetchWithAuth(`/api/meals?startDate=${nutritionStartDate}&endDate=${nutritionEndDate}`);
         if (res.ok) {
             const { meals } = await res.json();
             renderMeals(meals);
@@ -315,7 +329,10 @@ function renderMeals(meals) {
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                         <span style="font-size: 1.5rem;">${mealIcons[meal.meal_type] || '🍽️'}</span>
-                        <strong style="text-transform: capitalize;">${meal.meal_type}</strong>
+                        <div style="display: flex; flex-direction: column;">
+                             <strong style="text-transform: capitalize;">${meal.meal_type}</strong>
+                             <span style="font-size: 0.75rem; color: var(--text-muted);">${new Date(meal.meal_date).toLocaleDateString()}</span>
+                        </div>
                     </div>
                     <p style="color: var(--text-muted); margin-bottom: 0.5rem;">${meal.description}</p>
                     <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--text-muted);">

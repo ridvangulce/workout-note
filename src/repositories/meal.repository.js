@@ -91,20 +91,30 @@ const mealRepository = {
     },
 
     /**
-     * Get daily nutrition summary
+     * Get nutrition summary for a date range
      */
-    async getDailySummary(userId, date) {
-        const result = await pool.query(
-            `SELECT 
+    async getDailySummary(userId, startDate, endDate) {
+        let query = `
+            SELECT 
                 COUNT(*) as meal_count,
                 COALESCE(SUM(calories), 0) as total_calories,
                 COALESCE(SUM(protein), 0) as total_protein,
                 COALESCE(SUM(carbs), 0) as total_carbs,
                 COALESCE(SUM(fat), 0) as total_fat
              FROM meals
-             WHERE user_id = $1 AND meal_date = $2`,
-            [userId, date]
-        );
+             WHERE user_id = $1 AND meal_date >= $2
+        `;
+
+        const params = [userId, startDate];
+
+        if (endDate) {
+            query += ` AND meal_date <= $3`;
+            params.push(endDate);
+        } else {
+            query += ` AND meal_date <= $2`; // Fallback to single day if no end date
+        }
+
+        const result = await pool.query(query, params);
         return result.rows[0];
     },
 

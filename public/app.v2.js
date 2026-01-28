@@ -171,7 +171,80 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setupVideoSearch();
+    setupMobileNavigation();
 });
+
+function setupMobileNavigation() {
+    // 1. Hamburger Menu Config
+    const hamburger = document.querySelector('.hamburger-menu');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a link
+        navLinks.querySelectorAll('a, button').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+
+    // 2. Sidebar Mobile Config
+    const sidebarToggle = document.getElementById('mobileSidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add('active');
+        if (overlay) overlay.classList.add('active');
+    }
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (sidebar.classList.contains('active')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    // Close sidebar when clicking a menu item
+    if (sidebar) {
+        sidebar.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                // Determine if we are on mobile (simple width check or just always close)
+                if (window.innerWidth <= 968) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
+}
 
 // --- Settings Handlers ---
 

@@ -123,14 +123,25 @@ const mealController = {
     async getDailySummary(req, res, next) {
         try {
             const userId = req.user.id;
-            const { date } = req.query;
-            const summaryDate = date || new Date().toISOString().split('T')[0];
+            const { date, startDate, endDate } = req.query;
 
-            const summary = await mealRepository.getDailySummary(userId, summaryDate);
+            // Priority: range (startDate & endDate) > specific date > today
+            let start = startDate;
+            let end = endDate;
+
+            if (!start) {
+                start = date || new Date().toISOString().split('T')[0];
+            }
+            if (!end && date) {
+                end = date;
+            }
+
+            const summary = await mealRepository.getDailySummary(userId, start, end);
             const goals = await nutritionGoalRepository.getByUserId(userId);
 
             res.json({
-                date: summaryDate,
+                startDate: start,
+                endDate: end || start,
                 summary,
                 goals: goals || null
             });
@@ -168,34 +179,53 @@ const mealController = {
             const userId = req.user.id;
             const { period = 'week', date } = req.query;
 
-            // Calculate date range based on period
-            const targetDate = date ? new Date(date) : new Date();
-            let startDate, endDate;
+            // Analytics Logic
+            // If explicit start/end dates are provided (e.g. from filter), use them.
+            // Otherwise, calculate based on period/date.
 
-            if (period === 'day') {
-                // Single day
-                startDate = targetDate.toISOString().split('T')[0];
-                endDate = startDate;
-            } else if (period === 'week') {
-                // Last 7 days
-                endDate = targetDate.toISOString().split('T')[0];
-                const start = new Date(targetDate);
-                start.setDate(start.getDate() - 6);
-                startDate = start.toISOString().split('T')[0];
-            } else if (period === 'month') {
-                // Last 30 days
-                endDate = targetDate.toISOString().split('T')[0];
-                const start = new Date(targetDate);
-                start.setDate(start.getDate() - 29);
-                startDate = start.toISOString().split('T')[0];
+            const { startDate: queryStartDate, endDate: queryEndDate } = req.query;
+            let startDate, endDate, effectivePeriod;
+
+            if (queryStartDate && queryEndDate) {
+                // Explicit range provided
+                startDate = queryStartDate;
+                endDate = queryEndDate;
+
+                // Determine effective period for repository
+                // If single day, we want 'day' breakdown (meal types).
+                // If multiple days, we want 'custom' (date breakdown).
+                if (startDate === endDate) {
+                    effectivePeriod = 'day';
+                } else {
+                    effectivePeriod = 'custom';
+                }
             } else {
-                return res.status(400).json({ error: 'Invalid period. Use day, week, or month.' });
+                // Legacy/Default logic
+                effectivePeriod = period;
+                const targetDate = date ? new Date(date) : new Date();
+
+                if (period === 'day') {
+                    startDate = targetDate.toISOString().split('T')[0];
+                    endDate = startDate;
+                } else if (period === 'week') {
+                    endDate = targetDate.toISOString().split('T')[0];
+                    const start = new Date(targetDate);
+                    start.setDate(start.getDate() - 6);
+                    startDate = start.toISOString().split('T')[0];
+                } else if (period === 'month') {
+                    endDate = targetDate.toISOString().split('T')[0];
+                    const start = new Date(targetDate);
+                    start.setDate(start.getDate() - 29);
+                    startDate = start.toISOString().split('T')[0];
+                } else {
+                    return res.status(400).json({ error: 'Invalid period. Use day, week, or month.' });
+                }
             }
 
-            const data = await mealRepository.getAnalyticsData(userId, period, startDate, endDate);
+            const data = await mealRepository.getAnalyticsData(userId, effectivePeriod, startDate, endDate);
 
             res.json({
-                period,
+                period: effectivePeriod,
                 startDate,
                 endDate,
                 data

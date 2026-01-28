@@ -14,54 +14,52 @@ async function analyzeMeal(description, language = 'en') {
             throw new Error('GEMINI_API_KEY is not configured');
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.0-flash", // Upgrading to 2.0 Flash for better performance/consistency
+            generationConfig: {
+                temperature: 0.0, // Zero temperature for deterministic results
+                responseMimeType: "application/json",
+            }
+        });
 
         const languageInstructions = language === 'tr'
-            ? 'Porsiyon notunu Türkçe yaz.'
-            : 'Write portion note in English.';
+            ? 'Porsiyon notunu Türkçe yaz ve Türkiye standartlarındaki porsiyonları baz al.'
+            : 'Write portion note in English and use standard serving sizes.';
 
         const prompt = `
-Analyze this meal and provide nutritional estimates in JSON format.
-Meal: "${description}"
+You are a professional nutritionist API. Analyze this meal description and provide highly accurate nutritional estimates based on standard databases (like USDA or similar).
+
+Meal Description: "${description}"
 
 ${languageInstructions}
 
-Return ONLY valid JSON with this exact structure (no markdown, no additional text):
+Rules:
+1. Be consistent. Identical descriptions must yield identical results.
+2. If portion sizes are not specified, assume standard medium servings (e.g., 1 slice of bread = ~30g, 1 egg = ~50g).
+3. BE PRECISE. Do not round aggressively unless necessary.
+4. Return a SINGLE JSON object.
+
+Required JSON Structure:
 {
-  "calories": <number>,
-  "protein": <number in grams>,
-  "carbs": <number in grams>,
-  "fat": <number in grams>,
-  "portionNote": "<brief portion size assumption>"
+  "calories": <number, integer>,
+  "protein": <number, float, grams>,
+  "carbs": <number, float, grams>,
+  "fat": <number, float, grams>,
+  "portionNote": "<string, brief explanation of assumptions>"
 }
-
-Example 1: "2 eggs, toast" → {"calories": 300, "protein": 18, "carbs": 25, "fat": 12, "portionNote": "2 medium eggs, 2 slices whole wheat bread"}
-Example 2: "tavuklu salata" → {"calories": 350, "protein": 30, "carbs": 15, "fat": 18, "portionNote": "orta boy porsiyon"}
-
-Be realistic with portion sizes if not specified.
 `;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
-        // Try to extract JSON from response
+        // Parse JSON directly as we enforced JSON output
         let nutritionData;
         try {
-            // Remove potential markdown code blocks
-            const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-            nutritionData = JSON.parse(cleanText);
+            nutritionData = JSON.parse(text);
         } catch (parseError) {
-            console.error('Failed to parse Gemini response:', text);
-            // Return default estimate if parsing fails
-            return {
-                calories: 300,
-                protein: 15,
-                carbs: 30,
-                fat: 10,
-                portionNote: language === 'tr' ? 'Tahmin edildi' : 'Estimated',
-                error: 'Could not parse AI response'
-            };
+            console.error('Failed to parse Gemini JSON:', text);
+            throw new Error('Invalid JSON response from AI');
         }
 
         // Validate response structure

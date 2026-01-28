@@ -206,7 +206,8 @@ const TRANSLATIONS = {
         "todays_meals": "Today's Meals",
         "no_meals_today": "No meals logged today",
         "meal_description_required": "Please describe your meal",
-        "confirm_delete_meal": "Delete this meal?"
+        "confirm_delete_meal": "Delete this meal?",
+        "filter_btn": "Filter"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -415,6 +416,7 @@ const TRANSLATIONS = {
         "todays_meals": "Bugünkü Öğünler",
         "no_meals_today": "Bugün eklenen öğün yok",
         "meal_description_required": "Lütfen öğününüzü açıklayın",
-        "confirm_delete_meal": "Bu öğünü silinsin mi?"
+        "confirm_delete_meal": "Bu öğünü silinsin mi?",
+        "filter_btn": "Filtrele"
     }
 };
