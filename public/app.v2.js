@@ -130,7 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
         createRoutineForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('routineName').value;
-            const exercises = Array.from(document.querySelectorAll('input[name="exercises"]:checked')).map(cb => cb.value);
+            // Get checked exercises in DOM order (which reflects visual reordering)
+            const exercises = Array.from(document.querySelectorAll('#exerciseSelectContainer .exercise-checkbox-item-wrapper'))
+                .map(wrapper => wrapper.querySelector('input[name="exercises"]'))
+                .filter(checkbox => checkbox && checkbox.checked)
+                .map(checkbox => checkbox.value);
 
             try {
                 let url = '/api/routines';
@@ -480,6 +484,7 @@ async function updateDashboardUI() {
         const res = await fetchWithAuth('/api/exercises');
         if (res.ok) {
             const exercises = await res.json();
+            window.ALL_EXERCISES = exercises; // Cache for routine modal ordering
             const list = document.getElementById('exercisesList');
             const selectContainer = document.getElementById('exerciseSelectContainer');
 
@@ -581,9 +586,11 @@ async function updateDashboardUI() {
             // Render List
             const historyHtml = workouts.map(w => `
                 <div class="routine-card">
-                    <div class="routine-header" style="display:flex; justify-content:space-between;">
+                    <div class="routine-header" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
                         <div class="routine-title">${new Date(w.workout_date).toLocaleDateString()}</div>
                         <div class="routine-actions">
+                            <button class="btn-icon" onclick="exportWorkoutCSV('${w.id}')" title="Export CSV">📄</button>
+                            <button class="btn-icon" onclick="exportWorkoutJSON('${w.id}')" title="Export JSON">{}</button>
                             <button class="btn-icon" onclick="editHistoryWorkout('${w.id}')">✏️</button>
                             <button class="btn-icon" onclick="deleteHistoryWorkout('${w.id}')">🗑️</button>
                         </div>
@@ -694,6 +701,9 @@ window.openModal = function (modalId) {
             document.getElementById('createRoutineModalTitle').textContent = I18N.t('create_new_routine');
             document.getElementById('createRoutineSubmitBtn').textContent = I18N.t('save_routine');
             currentEditingRoutineId = null;
+            if (typeof renderRoutineExerciseSelection === 'function') {
+                renderRoutineExerciseSelection([]);
+            }
         }
         // Reset Logic for Add/Edit Exercise
         if (modalId === 'addExerciseModal' && !currentEditingExerciseId) {
@@ -1064,21 +1074,27 @@ async function saveExerciseOrder() {
 // Search/Filter Logic
 function filterExerciseTab() {
     const selectedMuscles = $('#exerciseTabFilter').val() || [];
+    const searchTerm = (document.getElementById('exerciseSearchInput').value || '').toLowerCase();
     const items = document.querySelectorAll('#exercisesList .exercise-item');
+
     items.forEach(item => {
-        if (selectedMuscles.length === 0) {
-            item.style.display = 'flex';
-            return;
+        const name = item.querySelector('.exercise-name').textContent.toLowerCase();
+
+        // Name Filter
+        const matchesName = name.includes(searchTerm);
+
+        // Muscle Filter
+        let matchesMuscle = true;
+        if (selectedMuscles.length > 0) {
+            const target = (item.dataset.target || '').toLowerCase();
+            const secondary = (item.dataset.secondary || '').split(',').map(s => s.trim().toLowerCase());
+            matchesMuscle = selectedMuscles.every(m => {
+                const lowerM = m.toLowerCase();
+                return target === lowerM || secondary.includes(lowerM);
+            });
         }
-        const target = (item.dataset.target || '').toLowerCase();
-        const secondary = (item.dataset.secondary || '').split(',').map(s => s.trim().toLowerCase());
 
-        const matchesMuscle = selectedMuscles.every(m => {
-            const lowerM = m.toLowerCase();
-            return target === lowerM || secondary.includes(lowerM);
-        });
-
-        item.style.display = matchesMuscle ? 'flex' : 'none';
+        item.style.display = (matchesName && matchesMuscle) ? 'flex' : 'none';
     });
 }
 
@@ -1088,12 +1104,17 @@ const routineExerciseFilter = document.getElementById('routineExerciseFilter');
 function filterRoutineExercises() {
     const term = exerciseSearch.value.toLowerCase();
     const selectedMuscles = $('#routineExerciseFilter').val() || [];
+    // Target the labels to check data attributes, but we will hide/show their closest wrapper
     const items = document.querySelectorAll('#exerciseSelectContainer .exercise-checkbox-item');
 
     items.forEach(item => {
         const name = item.dataset.name || '';
         const target = (item.dataset.target || '').toLowerCase();
         const secondary = (item.dataset.secondary || '').split(',').map(s => s.trim().toLowerCase());
+
+        // Find the wrapper
+        const wrapper = item.closest('.exercise-checkbox-item-wrapper');
+        if (!wrapper) return;
 
         const matchesName = name.includes(term);
         let matchesMuscle = true;
@@ -1106,15 +1127,20 @@ function filterRoutineExercises() {
         }
 
         if (matchesName && matchesMuscle) {
-            item.style.display = 'flex';
+            wrapper.style.display = 'flex';
         } else {
-            item.style.display = 'none';
+            wrapper.style.display = 'none';
         }
     });
 }
 
 if (exerciseSearch) {
     exerciseSearch.addEventListener('input', filterRoutineExercises);
+}
+
+const exerciseTabSearch = document.getElementById('exerciseSearchInput');
+if (exerciseTabSearch) {
+    exerciseTabSearch.addEventListener('input', filterExerciseTab);
 }
 
 // Routine CRUD
@@ -1141,14 +1167,14 @@ window.openEditRoutineModal = async function (id) {
 
             // Populate Modal
             document.getElementById('routineName').value = routine.name;
-            document.getElementById('createRoutineModalTitle').textContent = I18N.t('edit_exercise').split(':')[0]; // Refactor later
-            document.getElementById('createRoutineSubmitBtn').textContent = I18N.t('update_exercise').split(' ')[0]; // Refactor later
+            // document.getElementById('createRoutineModalTitle').textContent = I18N.t('edit_exercise').split(':')[0]; // Refactor later
+            // document.getElementById('createRoutineSubmitBtn').textContent = I18N.t('update_exercise').split(' ')[0]; // Refactor later
 
-            // Checks
+            // IDs and specific order
             const exerciseIds = routine.exercises ? routine.exercises.map(e => String(e.id)) : [];
-            document.querySelectorAll('input[name="exercises"]').forEach(cb => {
-                cb.checked = exerciseIds.includes(cb.value);
-            });
+
+            // Render specific order
+            renderRoutineExerciseSelection(exerciseIds);
 
             window.openModal('createRoutineModal');
         }
@@ -1383,4 +1409,177 @@ async function loadSettingsProfile() {
             }
         }
     } catch (e) { console.error(e); }
+}
+
+// --- Export Functions ---
+
+window.exportWorkoutCSV = async function (id) {
+    try {
+        const res = await fetchWithAuth(`/api/workouts/${id}`);
+        if (!res.ok) throw new Error('Failed to fetch workout');
+        const data = await res.json();
+        const workout = data.workout;
+
+        // CSV Header
+        let csvContent = "Date,Exercise,Set,Weight,Unit,Reps,RIR,Note\n";
+
+        workout.exercises.forEach(ex => {
+            ex.sets.forEach(set => {
+                const row = [
+                    new Date(workout.workout_date).toLocaleDateString(),
+                    `"${ex.name.replace(/"/g, '""')}"`, // Escape quotes
+                    set.set_number,
+                    set.weight,
+                    set.weight_unit,
+                    set.reps,
+                    set.rir || '',
+                    `"${(set.note || '').replace(/"/g, '""')}"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+        });
+
+        // Create download link
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `workout_${new Date(workout.workout_date).toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Clean up
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error(e);
+        alert(I18N.t('error_generic'));
+    }
+}
+
+window.exportWorkoutJSON = async function (id) {
+    try {
+        const res = await fetchWithAuth(`/api/workouts/${id}`);
+        if (!res.ok) throw new Error('Failed to fetch workout');
+        const data = await res.json();
+        const workout = data.workout;
+
+        const jsonStr = JSON.stringify(workout, null, 2);
+
+        const modal = document.getElementById('jsonExportModal');
+        const textarea = document.getElementById('jsonExportTextarea');
+
+        if (modal && textarea) {
+            textarea.value = jsonStr;
+            modal.style.display = 'block';
+        }
+    } catch (e) {
+        console.error(e);
+        alert(I18N.t('error_generic'));
+    }
+}
+
+window.copyJsonExport = function () {
+    const textarea = document.getElementById('jsonExportTextarea');
+    if (textarea) {
+        textarea.select();
+        document.execCommand('copy'); // Fallback for older browsers
+
+        // Modern approach
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const btn = document.querySelector('#jsonExportModal .btn-primary');
+                const originalText = btn.textContent;
+                btn.textContent = I18N.t('copied') || "Copied!";
+                setTimeout(() => { btn.textContent = originalText; }, 2000);
+            });
+        }
+    }
+}
+
+// Ensure closeModal handles the new modal
+const originalCloseModal = window.closeModal;
+window.closeModal = function (modalId) {
+    if (modalId === 'jsonExportModal') {
+        document.getElementById('jsonExportModal').style.display = 'none';
+        return;
+    }
+    if (originalCloseModal) originalCloseModal(modalId);
+}
+
+// --- Specific Routine Exercise Ordering ---
+
+window.renderRoutineExerciseSelection = function (selectedIds = []) {
+    const container = document.getElementById('exerciseSelectContainer');
+    if (!container) return;
+
+    // Safety check for ALL_EXERCISES
+    if (!window.ALL_EXERCISES || window.ALL_EXERCISES.length === 0) {
+        container.innerHTML = `<div class="empty-state">${I18N.t('loading_exercises') || 'Loading...'}</div>`;
+        return;
+    }
+
+    // Separate selected (ordered) vs others (alphabetical)
+    const selectedExercises = [];
+    selectedIds.forEach(id => {
+        const ex = window.ALL_EXERCISES.find(e => String(e.id) === String(id));
+        if (ex) selectedExercises.push(ex);
+    });
+
+    const unselectedExercises = window.ALL_EXERCISES.filter(ex => !selectedIds.includes(String(ex.id)))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    const finalOrder = [...selectedExercises, ...unselectedExercises];
+
+    container.innerHTML = finalOrder.map(ex => {
+        const isChecked = selectedIds.includes(String(ex.id));
+
+        return `
+            <div class="exercise-checkbox-item-wrapper" style="display:flex; align-items:center; gap:0.5rem; width:100%; order: unset;"> 
+                <label class="exercise-checkbox-item" data-name="${ex.name.toLowerCase()}" data-target="${(ex.target_muscle_group || '').toLowerCase()}" data-secondary="${(ex.secondary_muscles || '').toLowerCase()}" style="flex:1;">
+                    <input type="checkbox" value="${ex.id}" name="exercises" ${isChecked ? 'checked' : ''} onchange="toggleExerciseOrderControls(this)">
+                    ${ex.name}
+                </label>
+                
+                <div class="order-controls" style="display: ${isChecked ? 'flex' : 'none'}; gap: 2px;">
+                    <button type="button" class="btn-icon" style="padding: 2px; width:24px; height:24px; font-size: 0.8rem;" onclick="moveExerciseUp(this)">▲</button>
+                    <button type="button" class="btn-icon" style="padding: 2px; width:24px; height:24px; font-size: 0.8rem;" onclick="moveExerciseDown(this)">▼</button>
+                </div>
+
+                ${ex.video_url ? `
+                    <button type="button" class="btn-icon" style="background:rgba(255,0,0,0.1); width:32px; height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#ff4d4d;" 
+                        onclick="openVideoPreview('${ex.video_url}', '${ex.name.replace(/'/g, "\\'")}')" title="Preview Video">
+                        ▶
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+window.toggleExerciseOrderControls = function (checkbox) {
+    const wrapper = checkbox.closest('.exercise-checkbox-item-wrapper');
+    const controls = wrapper.querySelector('.order-controls');
+
+    if (checkbox.checked) {
+        controls.style.display = 'flex';
+    } else {
+        controls.style.display = 'none';
+    }
+}
+
+window.moveExerciseUp = function (btn) {
+    const wrapper = btn.closest('.exercise-checkbox-item-wrapper');
+    const prev = wrapper.previousElementSibling;
+    if (prev) {
+        wrapper.parentNode.insertBefore(wrapper, prev);
+    }
+}
+
+window.moveExerciseDown = function (btn) {
+    const wrapper = btn.closest('.exercise-checkbox-item-wrapper');
+    const next = wrapper.nextElementSibling;
+    if (next) {
+        wrapper.parentNode.insertBefore(next, wrapper);
+    }
 }
