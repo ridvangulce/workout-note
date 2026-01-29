@@ -177,6 +177,7 @@
                 <li><a href="#" data-view="routines" data-i18n="nav_workouts">My Workouts</a></li>
                 <li><a href="#" data-view="exercises" data-i18n="nav_exercises">Exercises</a></li>
                 <li><a href="#" data-view="nutrition" data-i18n="nav_nutrition">Nutrition</a></li>
+                <li><a href="#" data-view="ai-trainer" data-i18n="nav_ai_trainer">AI Trainer</a></li>
                 <li><a href="#" data-view="history" data-i18n="nav_history">History</a></li>
                 <li><a href="#" data-view="settings" data-i18n="nav_settings">Settings</a></li>
             </ul>
@@ -325,39 +326,59 @@
                     <h2 data-i18n="nav_settings">Settings</h2>
                 </header>
 
-                <div class="settings-grid">
-                    <!-- Profile Card -->
-                    <div class="feature-card settings-card">
-                        <h3 data-i18n="settings_profile">Profile</h3>
-                        <form id="settingsProfileForm">
-                            <div class="form-group">
-                                <label data-i18n="name_label">Full Name</label>
-                                <input type="text" id="settingsName" required>
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="email_label">Email Address</label>
-                                <input type="email" id="settingsEmail" disabled
-                                    style="opacity: 0.7; cursor: not-allowed;">
-                            </div>
-                            <button type="submit" class="btn btn-primary" data-i18n="btn_save_changes">Save
-                                Changes</button>
-                        </form>
+                <div class="settings-layout">
+                    <!-- Left Sidebar (Profile & Security) -->
+                    <div class="settings-sidebar">
+                        <!-- Profile Card -->
+                        <div class="feature-card settings-card">
+                            <h3 data-i18n="settings_profile">Profile</h3>
+                            <form id="settingsProfileForm">
+                                <div class="form-group">
+                                    <label data-i18n="name_label">Full Name</label>
+                                    <input type="text" id="settingsName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="email_label">Email Address</label>
+                                    <input type="email" id="settingsEmail" disabled
+                                        style="opacity: 0.7; cursor: not-allowed;">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width:100%"
+                                    data-i18n="btn_save_changes">Save Changes</button>
+                            </form>
+                        </div>
+
+                        <!-- Security Card -->
+                        <div class="feature-card settings-card">
+                            <h3 data-i18n="settings_security">Security</h3>
+                            <form id="settingsPasswordForm">
+                                <div class="form-group">
+                                    <label data-i18n="lbl_current_password">Current Password</label>
+                                    <input type="password" id="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label data-i18n="lbl_new_password">New Password</label>
+                                    <input type="password" id="newPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-outline" style="width:100%"
+                                    data-i18n="btn_change_password">Change Password</button>
+                            </form>
+                        </div>
                     </div>
 
-                    <!-- Health Profile Card -->
-                    <div class="feature-card settings-card">
-                        <h3 data-i18n="settings_health_profile">Health Profile</h3>
-                        <form id="settingsHealthProfileForm">
-                            <div class="form-group">
-                                <div style="display: flex; gap: 1rem;">
-                                    <div style="flex: 1;">
+                    <!-- Main Content (Health Profile) -->
+                    <div class="settings-content">
+                        <div class="feature-card settings-card">
+                            <h3 data-i18n="settings_health_profile">Health Profile</h3>
+                            <form id="settingsHealthProfileForm">
+                                <div class="form-row">
+                                    <div class="form-group col-half">
                                         <label data-i18n="gender">Gender</label>
                                         <select id="settingsGender" class="input-field custom-select">
                                             <option value="male" data-i18n="male">Male</option>
                                             <option value="female" data-i18n="female">Female</option>
                                         </select>
                                     </div>
-                                    <div style="flex: 1;">
+                                    <div class="form-group col-half">
                                         <label data-i18n="activity_level">Activity Level</label>
                                         <select id="settingsActivity" class="input-field custom-select">
                                             <option value="sedentary" data-i18n="sedentary">Sedentary</option>
@@ -368,30 +389,28 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <div style="display: flex; gap: 1rem;">
-                                    <div style="flex: 1;">
+
+                                <div class="form-row">
+                                    <div class="form-group col-third">
                                         <label data-i18n="height">Height (cm)</label>
                                         <input type="number" id="settingsHeight" class="input-field">
                                     </div>
-                                    <div style="flex: 1;">
+                                    <div class="form-group col-third">
                                         <label data-i18n="weight">Weight (kg)</label>
                                         <input type="number" id="settingsWeight" class="input-field">
                                     </div>
-                                    <div style="flex: 1;">
+                                    <div class="form-group col-third">
                                         <label data-i18n="age">Age</label>
                                         <input type="number" id="settingsAge" class="input-field">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <div style="display: flex; gap: 1rem;">
-                                    <div style="flex: 1;">
+
+                                <div class="form-row">
+                                    <div class="form-group col-half">
                                         <label data-i18n="target_weight">Target Weight (kg)</label>
                                         <input type="number" id="settingsTargetWeight" class="input-field">
                                     </div>
-                                    <div style="flex: 1;">
+                                    <div class="form-group col-half">
                                         <label data-i18n="goal">Goal</label>
                                         <select id="settingsGoal" class="input-field custom-select">
                                             <option value="lose" data-i18n="lose_weight">Lose Weight</option>
@@ -401,30 +420,88 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary" data-i18n="calculate_goals">Update &
-                                Recalculate</button>
-                        </form>
-                    </div>
 
-                    <!-- Security Card -->
-                    <div class="feature-card settings-card">
-                        <h3 data-i18n="settings_security">Security</h3>
-                        <form id="settingsPasswordForm">
-                            <div class="form-group">
-                                <label data-i18n="lbl_current_password">Current Password</label>
-                                <input type="password" id="currentPassword" required>
-                            </div>
-                            <div class="form-group">
-                                <label data-i18n="lbl_new_password">New Password</label>
-                                <input type="password" id="newPassword" required>
-                            </div>
-                            <button type="submit" class="btn btn-outline" data-i18n="btn_change_password">Change
-                                Password</button>
-                        </form>
+                                <div class="form-group">
+                                    <label data-i18n="fitness_goal_label">Primary Fitness Goal (Details &
+                                        Context)</label>
+                                    <textarea id="settingsFitnessGoal" class="input-field" rows="4"
+                                        placeholder="e.g. I want to hit 75kg bodyweight and increase my bench press to 100kg. Focus specifically on chest hypertrophy."></textarea>
+                                </div>
+                                <div style="display:flex; justify-content:flex-end;">
+                                    <button type="submit" class="btn btn-primary" data-i18n="calculate_goals">Update &
+                                        Recalculate</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </div> <!-- End settings-view -->
+
+            <!-- AI Trainer View -->
+            <div id="ai-trainer-view" class="view-section" style="display: none;">
+                <header class="dashboard-header">
+                    <h2 data-i18n="ai_trainer_title">🧠 AI Trainer</h2>
+                </header>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card"
+                            style="background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; margin-bottom: 2rem;">
+                            <h3 data-i18n="ai_trainer_input_title" style="margin-bottom: 1rem;">Paste Your Workout Log
+                            </h3>
+                            <p data-i18n="ai_trainer_desc"></p>
+
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <button class="btn btn-sm btn-outline active" id="aiTabNew" data-i18n="nav_ai_new"
+                                    onclick="switchAiTab('new')">New Analysis</button>
+                                <button class="btn btn-sm btn-outline" id="aiTabHistory" data-i18n="nav_ai_history"
+                                    onclick="switchAiTab('history')">Past Analyses</button>
+                            </div>
+
+                            <div id="aiNewAnalysisSection">
+                                <textarea id="workoutLogInput" class="input-field enhanced-textarea" rows="12"
+                                    placeholder="e.g.
+                            Bench Press
+                            4x10 @ 25kg
+                            Zorluk: 7/10
+                            RIR: 2-3" style="width: 100%; margin-bottom: 1rem; font-family: monospace;"></textarea>
+
+                                <button id="analyzeWorkoutBtn" class="btn btn-primary" onclick="evaluateWorkout()"
+                                    style="width: 100%;">
+                                    <span class="btn-text" data-i18n="analyze_workout_btn">Analyze Workout</span>
+                                </button>
+                            </div>
+
+                            <div id="aiHistorySection" style="display: none;">
+                                <div id="aiHistoryList" class="routines-grid">
+                                    <!-- History items populated via JS -->
+                                    <div class="empty-state">Loading history...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Result -->
+                    <div id="aiTrainerResults" style="display: none; margin-bottom: 3rem;">
+                        <div class="card"
+                            style="background: rgba(0, 242, 96, 0.05); border: 1px solid var(--primary-color); border-radius: 16px; padding: 2rem;">
+                            <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;"
+                                data-i18n="ai_analysis_title">🤖
+                                AI Coach Analysis</h3>
+                            <div id="aiTrainerResultContent" class="markdown-content" style="line-height: 1.6;">
+                                <!-- Content will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="aiTrainerLoading" style="display: none; text-align: center; margin: 2rem 0;">
+                        <div class="spinner"
+                            style="width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.1); border-left-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;">
+                        </div>
+                        <p class="text-muted" data-i18n="analyzing_workout">Analyzing your performance...</p>
+                    </div>
+                </div>
+            </div> <!-- End ai-trainer-view -->
 
             <!-- Nutrition View -->
             <div id="nutrition-view" class="view-section" style="display: none;">
@@ -498,7 +575,8 @@
                         <!-- Carbs -->
                         <div class="stat-card" style="display: block; padding: 1rem;">
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;"
-                                data-i18n="carbs">Carbs</div>
+                                data-i18n="carbs">
+                                Carbs</div>
                             <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
                                 <span id="carbsLeft">--</span><span data-i18n="unit_g">g</span>
                                 <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);"
@@ -519,7 +597,8 @@
                         <!-- Fat -->
                         <div class="stat-card" style="display: block; padding: 1rem;">
                             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem;"
-                                data-i18n="fat">Fat</div>
+                                data-i18n="fat">Fat
+                            </div>
                             <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
                                 <span id="fatLeft">--</span><span data-i18n="unit_g">g</span>
                                 <span style="font-size: 0.7rem; font-weight: 400; color: var(--text-muted);"
@@ -613,7 +692,8 @@
                                     <input type="number" step="0.1" id="fat" class="input-field" placeholder="0">
                                 </div>
                             </div>
-                            <p id="portionNote" class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;"></p>
+                            <p id="portionNote" class="text-muted" style="margin-top: 0.5rem; font-size: 0.875rem;">
+                            </p>
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="save_meal">Save
@@ -854,6 +934,8 @@
     <script src="body-map.js"></script>
     <script src="app.v2.js"></script>
     <script src="nutrition.js"></script>
+    <script src="ai-trainer.js"></script>
+    <script src="ai-trainer.js"></script>
 </body>
 
 </html>

@@ -9,4 +9,10 @@ router.get('/youtube-search', authMiddleware, integrationController.searchYoutub
 // Gemini AI meal analysis
 router.get('/analyze-meal', authMiddleware, integrationController.analyzeMeal);
 
+// Gemini AI trainer workout evaluation
+router.post('/evaluate-workout', authMiddleware, integrationController.evaluateWorkout);
+
+// Get AI workout history
+router.get('/ai-trainer/history', authMiddleware, integrationController.getWorkoutHistory);
+
 module.exports = router;

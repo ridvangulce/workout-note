@@ -15,7 +15,7 @@ const nutritionGoalRepository = {
     /**
      * Create or update nutrition goals
      */
-    async upsert(userId, { dailyCalorieTarget, dailyProteinTarget, dailyCarbsTarget, dailyFatTarget, height, weight, gender, age, activityLevel, targetWeight, goalType }) {
+    async upsert(userId, { dailyCalorieTarget, dailyProteinTarget, dailyCarbsTarget, dailyFatTarget, height, weight, gender, age, activityLevel, targetWeight, goalType, fitnessGoal }) {
         const result = await pool.query(
             `INSERT INTO nutrition_goals (
                 user_id, 
@@ -30,9 +30,10 @@ const nutritionGoalRepository = {
                 activity_level,
                 target_weight,
                 goal_type,
+                fitness_goal,
                 updated_at
             )
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
              ON CONFLICT (user_id) 
              DO UPDATE SET 
                 daily_calorie_target = COALESCE($2, nutrition_goals.daily_calorie_target),
@@ -46,9 +47,10 @@ const nutritionGoalRepository = {
                 activity_level = COALESCE($10, nutrition_goals.activity_level),
                 target_weight = COALESCE($11, nutrition_goals.target_weight),
                 goal_type = COALESCE($12, nutrition_goals.goal_type),
+                fitness_goal = COALESCE($13, nutrition_goals.fitness_goal),
                 updated_at = NOW()
              RETURNING *`,
-            [userId, dailyCalorieTarget, dailyProteinTarget, dailyCarbsTarget, dailyFatTarget, height, weight, gender, age, activityLevel, targetWeight, goalType]
+            [userId, dailyCalorieTarget, dailyProteinTarget, dailyCarbsTarget, dailyFatTarget, height, weight, gender, age, activityLevel, targetWeight, goalType, fitnessGoal]
         );
         return result.rows[0];
     },
