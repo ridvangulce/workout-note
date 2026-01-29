@@ -162,7 +162,7 @@ Format your response in Markdown:
 
 User's Workout Log:
 "${workoutLog}"
-`;
+
 
 # 🎯 SUMMARY DECISION(One paragraph)
             > [Concise summary logic]
@@ -185,7 +185,7 @@ User's Workout Log:
 
     } catch (error) {
         console.error("Gemini Workout Eval Error:", error);
-        throw new Error(`AI evaluation failed: ${ error.message } `);
+        throw new Error(`AI evaluation failed: ${error.message} `);
     }
 }
 
