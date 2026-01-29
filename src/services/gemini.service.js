@@ -17,9 +17,9 @@ async function analyzeMeal(description, language = 'en') {
         console.log('Gemini Service: Initializing with API Key ending in ...' + process.env.GEMINI_API_KEY.slice(-4));
 
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash", // Use stable 1.5 Flash model
+            model: "gemini-2.5-flash", // Updated to 2.5 Flash as 1.5 is retired/unavailable
             generationConfig: {
-                temperature: 0.1, // Slight temperature for better natural language handling while keeping consistency
+                temperature: 0.1,
                 responseMimeType: "application/json",
             }
         });
