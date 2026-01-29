@@ -116,6 +116,80 @@ Required JSON structure:
     }
 }
 
+/**
+ * Evaluate workout log using Gemini AI
+ * @param {string} workoutLog
+ * @param {string} language - 'en' | 'tr'
+ * @returns {Promise<Object>}
+ */
+async function evaluateWorkout(workoutLog, language = "en", userContext = "") {
+    try {
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            generationConfig: {
+                temperature: 0.2,
+            },
+        });
+
+        const prompt = `
+You are an elite Strength & Conditioning Coach. Your task is to analyze the user's workout log and provide brief, high-impact feedback.
+
+${userContext}
+
+Rules:
+1. **Analyze Performance**: Check if the volume, intensity, and RIR (Reps In Reserve) align with the user's goals (Hypertrophy, Strength, etc.).
+2. **Identify Issues**: Spot potential overtraining, junk volume, or insufficient intensity.
+3. **Decisions**: Explicitly state if they should *Increase Weight*, *Maintain*, *Deload*, or *Change Exercise*.
+4. **Next Workout Target**: Give a concrete goal for the next session (e.g., "Increase Bench Press by 2.5kg").
+5. **Language**: Respond in ${language === 'tr' ? 'Turkish' : 'English'}.
+6. **Tone**: Professional, encouraging, but direct. No fluff.
+
+Format your response in Markdown:
+# 📊 Quick Analysis
+(Brief summary of the session)
+
+## 💡 Key Observations
+- (Bullet points on form, intensity, or volume)
+
+## 🎯 Decisions
+| Exercise | Status | Action |
+|----------|--------|--------|
+| Bench Press | ✅ Good | Increase Weight +2.5kg |
+| Squat | ⚠️ RIR too high | Push harder next time |
+
+## 🚀 Next Workout Goals
+- (Specific targets for next time)
+
+User's Workout Log:
+"${workoutLog}"
+`;
+
+# 🎯 SUMMARY DECISION(One paragraph)
+            > [Concise summary logic]
+
+# 🔜 NEXT WORKOUT TARGETS
+            * [Exercise 1] →[Target]
+                * [Exercise 2] →[Target]
+...
+
+        `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+
+        return {
+            analysis: text,
+            generatedAt: new Date().toISOString()
+        };
+
+    } catch (error) {
+        console.error("Gemini Workout Eval Error:", error);
+        throw new Error(`AI evaluation failed: ${ error.message } `);
+    }
+}
+
 module.exports = {
     analyzeMeal,
+    evaluateWorkout
 };

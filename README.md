@@ -22,11 +22,9 @@
 *   **Multi-Language Support:** Full support for both English 🇬🇧 and Turkish 🇹🇷, including dynamic content and validation messages.
 *   **Smart Routines:** Create and manage personalized workout routines.
 *   **Secure & Private:** Dedicated user profiles with secure JWT-based authentication.
-*   **Health Profile & Nutrition Integration:**
-    *   **Automatic Calculation:** Profile-based (height, weight, age) BMR and TDEE calculation (Mifflin-St Jeor).
-    *   **Goal Setting:** Personalized daily calorie and macro goals.
-    *   **Real-time Tracking:** Dynamic progress bars and daily summary.
-*   **Health Profile & Nutrition Integration:**
+*   **AI Personal Trainer:** 🧠 Analyze your past workout logs with Gemini 2.0 Flash. Get personalized feedback, RPE analysis, and actionable advice to optimize your training.
+*   **YouTube Integration:** 🎥 Add video demonstrations to exercises. Preview videos directly within the app for better form guidance.
+*   **Settings & Health Profile:**
     *   **Automatic Calculation:** Profile-based (height, weight, age) BMR and TDEE calculation (Mifflin-St Jeor).
     *   **Goal Setting:** Personalized daily calorie and macro goals.
     *   **Real-time Tracking:** Dynamic progress bars and daily summary.
@@ -141,10 +139,8 @@ npm run test:coverage    # Coverage report
 *   **Çoklu Dil Desteği:** Dinamik içerik ve doğrulama mesajları dahil olmak üzere hem İngilizce 🇬🇧 hem de Türkçe 🇹🇷 için tam destek.
 *   **Akıllı Rutinler:** Kişiselleştirilmiş antrenman rutinleri oluşturun ve yönetin.
 *   **Güvenli ve Özel:** Güvenli JWT tabanlı kimlik doğrulama ile kişisel kullanıcı profilleri.
-*   **Sağlık Profili ve Beslenme Entegrasyonu:**
-    *   **Otomatik Hesaplama:** Profil bazlı (boy, kilo, yaş) BMR ve TDEE hesaplaması (Mifflin-St Jeor).
-    *   **Hedef Belirleme:** Kişiselleştirilmiş günlük kalori ve makro hedefleri.
-    *   **Gerçek Zamanlı Takip:** Dinamik ilerleme çubukları ve günlük özet.
+*   **AI Kişisel Antrenör:** 🧠 Geçmiş antrenman loglarınızı Gemini 2.0 Flash ile analiz edin. Antrenmanınızı optimize etmek için kişiselleştirilmiş geri bildirimler, RPE analizi ve uygulanabilir tavsiyeler alın.
+*   **YouTube Entegrasyonu:** 🎥 Egzersizlere video gösterimleri ekleyin. Daha iyi form rehberliği için videoları doğrudan uygulama içinde önizleyin.
 *   **Sağlık Profili ve Beslenme Entegrasyonu:**
     *   **Otomatik Hesaplama:** Profil bazlı (boy, kilo, yaş) BMR ve TDEE hesaplaması (Mifflin-St Jeor).
     *   **Hedef Belirleme:** Kişiselleştirilmiş günlük kalori ve makro hedefleri.

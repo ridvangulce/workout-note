@@ -17,6 +17,7 @@ const TRANSLATIONS = {
         "nav_exercises": "Exercises",
         "nav_history": "History",
         "nav_settings": "Settings",
+        "nav_ai_trainer": "AI Trainer",
         "nav_cancel_back": "Cancel / Back",
 
         // Hero Section
@@ -41,6 +42,18 @@ const TRANSLATIONS = {
         "no_data_available": "No data available",
         "meal_type_label": "Meal Type",
         "meal_description_label": "Description",
+
+        // AI Trainer
+        "ai_trainer_title": "🧠 AI Trainer",
+        "ai_trainer_input_title": "Paste Your Workout Log",
+        "ai_trainer_desc": "Paste your workout details below (exercises, sets, reps, RIR, notes) to get an AI-powered analysis.",
+        "analyze_workout_btn": "Analyze Workout",
+        "ai_analysis_title": "🤖 AI Coach Analysis",
+        "analyzing_workout": "Analyzing your performance...",
+        "enter_workout_log": "Please enter a workout log.",
+        "ai_error": "An error occurred while analyzing the workout.",
+        "nav_ai_new": "New Analysis",
+        "nav_ai_history": "Past Analyses",
 
 
         // Features
@@ -242,7 +255,10 @@ const TRANSLATIONS = {
         "unit_g": "g",
         "target_label": "Target:",
         "search_exercises": "Search Exercises",
-        "search_by_name": "Search by Name"
+        "search_by_name": "Search by Name",
+        "copy_to_clipboard": "Copy to Clipboard",
+        "copied": "Copied!",
+        "fitness_goal_label": "Fitness Goal",
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -262,6 +278,7 @@ const TRANSLATIONS = {
         "nav_exercises": "Egzersizler",
         "nav_history": "Geçmiş",
         "nav_settings": "Ayarlar",
+        "nav_ai_trainer": "AI Antrenör",
         "nav_cancel_back": "Vazgeç / Geri",
 
         // Hero Section
@@ -286,6 +303,18 @@ const TRANSLATIONS = {
         "no_data_available": "Veri yok",
         "meal_type_label": "Öğün Tipi",
         "meal_description_label": "Açıklama",
+
+        // AI Trainer
+        "ai_trainer_title": "🧠 AI Antrenör",
+        "ai_trainer_input_title": "Antrenman Notlarını Yapıştır",
+        "ai_trainer_desc": "Antrenman detaylarını (hareketler, setler, tekrarlar, RIR, notlar) aşağıya yapıştır, AI analizini yapsın.",
+        "analyze_workout_btn": "Antrenmanı Analiz Et",
+        "ai_analysis_title": "🤖 AI Antrenör Analizi",
+        "analyzing_workout": "Performansın analiz ediliyor...",
+        "enter_workout_log": "Lütfen bir antrenman günlüğü girin.",
+        "ai_error": "Antrenman analiz edilirken bir hata oluştu.",
+        "nav_ai_new": "Yeni Analiz",
+        "nav_ai_history": "Geçmiş Analizler",
 
 
         // Features
@@ -487,6 +516,9 @@ const TRANSLATIONS = {
         "unit_g": "g",
         "target_label": "Hedef:",
         "search_exercises": "Egzersiz Ara",
-        "search_by_name": "İsme Göre Ara"
+        "search_by_name": "İsme Göre Ara",
+        "copy_to_clipboard": "Panoya Kopyala",
+        "copied": "Kopyalandı!",
+        "fitness_goal_label": "Fiziksel Hedef",
     }
 };
