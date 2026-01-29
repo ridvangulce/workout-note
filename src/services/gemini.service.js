@@ -120,6 +120,7 @@ Required JSON structure:
  * Evaluate workout log using Gemini AI
  * @param {string} workoutLog
  * @param {string} language - 'en' | 'tr'
+ * @param {string} userContext - Context about user's goals
  * @returns {Promise<Object>}
  */
 async function evaluateWorkout(workoutLog, language = "en", userContext = "") {
@@ -164,16 +165,6 @@ User's Workout Log:
 "${workoutLog}"
 `;
 
-# 🎯 SUMMARY DECISION(One paragraph)
-            > [Concise summary logic]
-
-# 🔜 NEXT WORKOUT TARGETS
-            * [Exercise 1] →[Target]
-                * [Exercise 2] →[Target]
-...
-
-        `;
-
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
@@ -185,7 +176,7 @@ User's Workout Log:
 
     } catch (error) {
         console.error("Gemini Workout Eval Error:", error);
-        throw new Error(`AI evaluation failed: ${ error.message } `);
+        throw new Error(`AI evaluation failed: ${error.message} `);
     }
 }
 
