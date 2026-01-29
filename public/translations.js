@@ -240,7 +240,9 @@ const TRANSLATIONS = {
         "over": "over",
         "unit_kcal": "kcal",
         "unit_g": "g",
-        "target_label": "Target:"
+        "target_label": "Target:",
+        "search_exercises": "Search Exercises",
+        "search_by_name": "Search by Name"
     },
     tr: {
         "title_index": "WorkoutNote - Antrenman Takip Sistemi",
@@ -483,6 +485,8 @@ const TRANSLATIONS = {
         "over": "aştı",
         "unit_kcal": "kcal",
         "unit_g": "g",
-        "target_label": "Hedef:"
+        "target_label": "Hedef:",
+        "search_exercises": "Egzersiz Ara",
+        "search_by_name": "İsme Göre Ara"
     }
 };

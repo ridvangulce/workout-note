@@ -123,6 +123,24 @@
             const container = document.getElementById(`sets-${exerciseId}`);
             const setNum = container.children.length + 1;
 
+            // SMART ADD: If no existing set provided, try to copy the last one
+            if (!existingSet && container.children.length > 0) {
+                const lastRow = container.lastElementChild;
+                const lastWeight = lastRow.querySelector('[name="weight"]').value;
+                const lastUnit = lastRow.querySelector('[name="unit"]').value;
+                const lastReps = lastRow.querySelector('[name="reps"]').value;
+                const lastRir = lastRow.querySelector('[name="rir"]').value;
+                const lastNote = lastRow.querySelector('[name="note"]').value;
+
+                existingSet = {
+                    weight: lastWeight,
+                    weight_unit: lastUnit,
+                    reps: lastReps, // will map to repsActual logic below
+                    rir: lastRir,
+                    note: lastNote
+                };
+            }
+
             const div = document.createElement('div');
             div.className = 'set-row';
             div.style.display = 'flex';
@@ -131,6 +149,7 @@
             div.style.alignItems = 'center';
 
             const weightVal = existingSet ? existingSet.weight : '';
+            // handle both "reps" (from smart copy) and "res" (if from DB legacy) if needed, though usually DB is reps
             const repsActual = existingSet ? (existingSet.reps || existingSet.res) : '';
             const rirVal = existingSet && existingSet.rir ? existingSet.rir : '';
             const noteVal = existingSet && existingSet.note ? existingSet.note : '';
@@ -138,14 +157,14 @@
 
             div.innerHTML = `
                 <span class="set-number" style="color:var(--text-muted); width: 20px;">${setNum}</span>
-                <input type="number" placeholder="${I18N.t('weight_label')}" class="set-input" name="weight" style="width: 70px;" value="${weightVal}">
+                <input type="number" placeholder="${I18N.t('weight_label')}" min="0" max="500" class="set-input" name="weight" style="width: 70px;" value="${weightVal}">
                 <select class="set-input" name="unit" style="width: 60px; padding: 0.5rem; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:6px; color:var(--text-color);">
                     <option value="kg" ${unitVal === 'kg' ? 'selected' : ''}>kg</option>
                     <option value="lbs" ${unitVal === 'lbs' ? 'selected' : ''}>lbs</option>
                     <option value="plate" ${unitVal === 'plate' ? 'selected' : ''}>plt</option>
                 </select>
-                <input type="number" placeholder="${I18N.t('reps_label')}" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
-                <input type="number" placeholder="${I18N.t('rir_label')}" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
+                <input type="number" placeholder="${I18N.t('reps_label')}" min="0" max="20" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
+                <input type="number" placeholder="${I18N.t('rir_label')}" min="0" max="5" value="1" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
                 <input type="text" placeholder="${I18N.t('note_label')}" class="set-input" name="note" style="flex:1;" value="${noteVal}">
                 <button class="btn btn-sm btn-outline" style="padding: 2px 8px;" onclick="this.parentElement.remove()">x</button>
             `;
