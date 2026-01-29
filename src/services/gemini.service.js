@@ -14,10 +14,12 @@ async function analyzeMeal(description, language = 'en') {
             throw new Error('GEMINI_API_KEY is not configured');
         }
 
+        console.log('Gemini Service: Initializing with API Key ending in ...' + process.env.GEMINI_API_KEY.slice(-4));
+
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.0-flash", // Upgrading to 2.0 Flash for better performance/consistency
+            model: "gemini-1.5-flash", // Use stable 1.5 Flash model
             generationConfig: {
-                temperature: 0.0, // Zero temperature for deterministic results
+                temperature: 0.1, // Slight temperature for better natural language handling while keeping consistency
                 responseMimeType: "application/json",
             }
         });
