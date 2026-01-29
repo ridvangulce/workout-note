@@ -839,6 +839,7 @@ async function fetchWithAuth(url, options = {}) {
 }
 
 function setLoading(btn, isLoading) {
+    if (!btn) return;
     if (isLoading) {
         btn.dataset.originalText = btn.textContent;
         btn.textContent = I18N.t('processing');
@@ -1356,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function handleUpdateHealthProfile(e) {
     e.preventDefault();
-    const btn = e.target.querySelector('button');
+    const btn = e.submitter || e.target.querySelector('button[type="submit"]');
     setLoading(btn, true);
 
     const profileData = {
@@ -1366,7 +1367,8 @@ async function handleUpdateHealthProfile(e) {
         age: parseInt(document.getElementById('settingsAge').value),
         targetWeight: parseFloat(document.getElementById('settingsTargetWeight').value),
         activityLevel: document.getElementById('settingsActivity').value,
-        goalType: document.getElementById('settingsGoal').value
+        goalType: document.getElementById('settingsGoal').value,
+        fitnessGoal: document.getElementById('settingsFitnessGoal').value
     };
 
     try {
@@ -1406,6 +1408,7 @@ async function loadSettingsProfile() {
                 if (g.target_weight) document.getElementById('settingsTargetWeight').value = g.target_weight;
                 if (g.activity_level) document.getElementById('settingsActivity').value = g.activity_level;
                 if (g.goal_type) document.getElementById('settingsGoal').value = g.goal_type;
+                if (g.fitness_goal) document.getElementById('settingsFitnessGoal').value = g.fitness_goal;
             }
         }
     } catch (e) { console.error(e); }

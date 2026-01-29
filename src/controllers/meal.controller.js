@@ -240,7 +240,7 @@ const mealController = {
     async updateProfile(req, res, next) {
         try {
             const userId = req.user.id;
-            const { height, weight, gender, age, activityLevel, targetWeight, goalType } = req.body;
+            const { height, weight, gender, age, activityLevel, targetWeight, goalType, fitnessGoal } = req.body;
 
             // Calculate Goals immediately (Mifflin-St Jeor Equation)
             let bmr;
@@ -288,7 +288,8 @@ const mealController = {
                 dailyCalorieTarget,
                 dailyProteinTarget,
                 dailyCarbsTarget,
-                dailyFatTarget
+                dailyFatTarget,
+                fitnessGoal
             });
 
             res.json({ goals });

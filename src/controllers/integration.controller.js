@@ -54,7 +54,71 @@ const analyzeMeal = async (req, res, next) => {
     }
 };
 
+
+
+const aiLogRepository = require('../repositories/ai_log.repository');
+
+const evaluateWorkout = async (req, res, next) => {
+    try {
+        const { workoutLog, language = 'en' } = req.body;
+        const userId = req.user.id;
+
+        if (!workoutLog || workoutLog.trim().length === 0) {
+            return res.status(400).json({ error: 'Workout log is required' });
+        }
+
+        // Fetch user profile/goals
+        const nutritionGoalRepository = require('../repositories/nutritionGoal.repository');
+        const userGoals = await nutritionGoalRepository.getByUserId(userId);
+
+        let userContext = "";
+        if (userGoals) {
+            userContext = `
+            User Profile:
+            - Weight: ${userGoals.weight || 'N/A'} kg
+            - Height: ${userGoals.height || 'N/A'} cm
+            - Gender: ${userGoals.gender || 'N/A'}
+            - Age: ${userGoals.age || 'N/A'}
+            - Activity Level: ${userGoals.activity_level || 'N/A'}
+            - Target Weight: ${userGoals.target_weight || 'N/A'} kg
+            - Main Fitness Goal: ${userGoals.fitness_goal || 'Not specified'}
+            - Goal Type: ${userGoals.goal_type || 'N/A'}
+            `;
+        } else {
+            userContext = "User profile not set.";
+        }
+
+        const geminiService = require('../services/gemini.service');
+        const evaluation = await geminiService.evaluateWorkout(workoutLog, language, userContext);
+
+        // Save to database
+        await aiLogRepository.create({
+            userId,
+            workoutLog,
+            analysis: evaluation.analysis
+        });
+
+        res.json(evaluation);
+    } catch (error) {
+        console.error('Evaluate workout error:', error);
+        res.status(500).json({ error: 'Failed to evaluate workout', details: error.message });
+    }
+};
+
+const getWorkoutHistory = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const history = await aiLogRepository.findByUserId(userId);
+        res.json(history);
+    } catch (error) {
+        console.error('Get workout history error:', error);
+        res.status(500).json({ error: 'Failed to fetch workout history' });
+    }
+};
+
 module.exports = {
     searchYoutube,
-    analyzeMeal
+    analyzeMeal,
+    evaluateWorkout,
+    getWorkoutHistory
 };
