@@ -164,7 +164,7 @@
                     <option value="plate" ${unitVal === 'plate' ? 'selected' : ''}>plt</option>
                 </select>
                 <input type="number" placeholder="${I18N.t('reps_label')}" min="0" max="20" class="set-input" name="reps" style="width: 60px;" value="${repsActual}">
-                <input type="number" placeholder="${I18N.t('rir_label')}" min="0" max="5" value="1" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
+                <input type="number" placeholder="${I18N.t('rir_label')}" min="0" max="5" class="set-input" name="rir" style="width: 50px;" value="${rirVal}">
                 <input type="text" placeholder="${I18N.t('note_label')}" class="set-input" name="note" style="flex:1;" value="${noteVal}">
                 <button class="btn btn-sm btn-outline" style="padding: 2px 8px;" onclick="this.parentElement.remove()">x</button>
             `;
