@@ -16,6 +16,7 @@ module.exports = {
     }
   },
   testMatch: ['**/__tests__/**/*.test.js'],
+  globalSetup: '<rootDir>/src/test-utils/globalSetup.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-utils/setup.js'],
   testTimeout: 10000,
   verbose: true

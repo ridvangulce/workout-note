@@ -7,8 +7,14 @@ if (!connectionString) {
 }
 
 const isLocal = connectionString.includes("localhost") || connectionString.includes("127.0.0.1");
-// Use SSL for all non-local connections (like Supabase)
-const useSSL = !isLocal;
+
+// SSL resolution:
+// 1. Explicit override via DB_SSL (true/false) — used by Docker/local setups.
+// 2. Otherwise use SSL for all non-local connections (like Supabase).
+const explicitSSL = process.env.DB_SSL;
+const useSSL = explicitSSL !== undefined
+  ? explicitSSL === "true" || explicitSSL === "1"
+  : !isLocal;
 
 const pool = new Pool({
   connectionString,
