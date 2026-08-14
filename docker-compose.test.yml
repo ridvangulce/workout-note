@@ -1,0 +1,29 @@
+services:
+  db-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: workout
+      POSTGRES_PASSWORD: workout
+      POSTGRES_DB: workout_test
+    # Ephemeral storage: the test DB is wiped when the container stops.
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workout -d workout_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  test:
+    build: .
+    depends_on:
+      db-test:
+        condition: service_healthy
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://workout:workout@db-test:5432/workout_test
+      DB_SSL: "false"
+      JWT_SECRET: test_only_secret
+      FRONTEND_URL: http://localhost:8080
+    # Jest globalSetup loads the schema into the fresh test DB before running.
+    command: npm test

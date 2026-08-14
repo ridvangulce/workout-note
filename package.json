@@ -11,7 +11,12 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "db:push": "node src/scripts/create_nutrition_goals_table.js && node src/scripts/add_profile_fields.js && node src/scripts/create_meals_table.js",
-    "db:deploy": "./scripts/push-prod.sh"
+    "db:deploy": "./scripts/push-prod.sh",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f app",
+    "test:docker": "docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test",
+    "test:docker:down": "docker compose -f docker-compose.test.yml down -v"
   },
   "keywords": [],
   "author": "",

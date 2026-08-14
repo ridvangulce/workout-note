@@ -73,6 +73,39 @@
     npm run dev
     ```
 
+### 🐳 Running with Docker (Recommended)
+
+The entire stack — Node.js API **and** PostgreSQL — runs in containers. No local Node or database installation required, only Docker.
+
+**Start everything:**
+```bash
+npm run docker:up
+```
+This builds the app image, starts PostgreSQL, **automatically creates the full schema** (core tables + nutrition/meals/AI tables), and launches the API at `http://localhost:8080`.
+
+**Other commands:**
+```bash
+npm run docker:down     # Stop and remove containers
+npm run docker:logs     # Tail the app logs
+```
+
+**Health checks:**
+```bash
+curl http://localhost:8080/api/health      # {"status":"ok"}
+curl http://localhost:8080/api/db-health   # {"db":"ok"}
+```
+
+**Notes:**
+*   Database credentials, `DATABASE_URL`, and `JWT_SECRET` are provided by `docker-compose.yml` for local development.
+*   Optional secrets (`GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `EMAIL_*`) are read from your `.env` file if present.
+*   If port `8080` is already in use, override the host port: `APP_PORT=8091 npm run docker:up`.
+*   Postgres data persists in the `pgdata` volume across restarts. To wipe it: `docker compose down -v`.
+
+**Run the tests in Docker** (spins up an ephemeral test database, no local Postgres needed):
+```bash
+npm run test:docker
+```
+
 ### Security Features
 *   **JWT Authentication** - Secure token-based authentication
 *   **Rate Limiting** - Protects endpoints from abuse:
@@ -189,6 +222,39 @@ npm run test:coverage    # Coverage report
     ```bash
     npm run dev
     ```
+
+### 🐳 Docker ile Çalıştırma (Önerilen)
+
+Tüm sistem — Node.js API **ve** PostgreSQL — konteynerlerde çalışır. Lokalde Node veya veritabanı kurulumuna gerek yoktur, yalnızca Docker yeterlidir.
+
+**Her şeyi başlat:**
+```bash
+npm run docker:up
+```
+Bu komut app imajını derler, PostgreSQL'i başlatır, **tüm şemayı otomatik oluşturur** (temel tablolar + beslenme/öğün/AI tabloları) ve API'yi `http://localhost:8080` adresinde ayağa kaldırır.
+
+**Diğer komutlar:**
+```bash
+npm run docker:down     # Konteynerleri durdur ve kaldır
+npm run docker:logs     # App loglarını izle
+```
+
+**Sağlık kontrolleri:**
+```bash
+curl http://localhost:8080/api/health      # {"status":"ok"}
+curl http://localhost:8080/api/db-health   # {"db":"ok"}
+```
+
+**Notlar:**
+*   Veritabanı bilgileri, `DATABASE_URL` ve `JWT_SECRET` lokal geliştirme için `docker-compose.yml` tarafından sağlanır.
+*   Opsiyonel secret'lar (`GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `EMAIL_*`) varsa `.env` dosyanızdan okunur.
+*   `8080` portu doluysa host portunu değiştirin: `APP_PORT=8091 npm run docker:up`.
+*   Postgres verisi `pgdata` volume'ünde kalıcıdır. Silmek için: `docker compose down -v`.
+
+**Testleri Docker'da çalıştırın** (efemeral bir test veritabanı açar, lokal Postgres gerekmez):
+```bash
+npm run test:docker
+```
 
 ### Güvenlik Özellikleri
 *   **JWT Kimlik Doğrulama** - Güvenli token tabanlı doğrulama

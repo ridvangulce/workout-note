@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: workout-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: workout
+      POSTGRES_PASSWORD: workout
+      POSTGRES_DB: workout_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Schema is loaded automatically on first boot (empty volume), in filename order.
+      - ./database.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./docker/init/02-extensions.sql:/docker-entrypoint-initdb.d/02-extensions.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U workout -d workout_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build: .
+    container_name: workout-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      DATABASE_URL: postgresql://workout:workout@db:5432/workout_db
+      DB_SSL: "false"
+      JWT_SECRET: dev_only_secret_change_me
+      FRONTEND_URL: http://localhost:8080
+    # Optional secrets (GEMINI_API_KEY, YOUTUBE_API_KEY, EMAIL_*) are pulled from
+    # .env if present. Values in `environment` above always take precedence.
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      # Host port is configurable (APP_PORT) to avoid clashing with a local dev server.
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      # Live-reload local source; keep the image's linux-built node_modules.
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  pgdata:
